@@ -1,0 +1,5 @@
+﻿Mode de transport physique;Coefficient d’émission g CO2/voy.km (gramme équivalent CO2 par voyageur au kilomètre);Source;URL source;Détail source;Formule de calcul de la quantité de CO2 émise par voyageur  
+Bus;132;ADEME - Agence de l'Environnement et de la Maîtrise de l'Energie;http://www.ademe.fr/sites/default/files/assets/documents/05-mthodologie_oeet_projets_de_tcsp_mai_2013.pdf;tableau page 2;nombre de kilomètres parcourus * coefficient d’émission g CO2/voy.km
+Funiculaire;3;A défaut de donnée fournie par l'ADEME, utilisation de la valeur définie par Keolis;;;nombre de kilomètres parcourus * coefficient d’émission g CO2/voy.km
+Métro;3;ADEME - Agence de l'Environnement et de la Maîtrise de l'Energie;http://www.ademe.fr/sites/default/files/assets/documents/05-mthodologie_oeet_projets_de_tcsp_mai_2013.pdf;tableau page 2;nombre de kilomètres parcourus * coefficient d’émission g CO2/voy.km
+Tramway;4;ADEME - Agence de l'Environnement et de la Maîtrise de l'Energie;http://www.ademe.fr/sites/default/files/assets/documents/05-mthodologie_oeet_projets_de_tcsp_mai_2013.pdf;tableau page 2;nombre de kilomètres parcourus * coefficient d’émission g CO2/voy.km
