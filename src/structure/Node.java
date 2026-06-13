@@ -20,4 +20,8 @@ public class Node {
     public Map<Node, Distance> getLinks() { return Map.copyOf(this.links); }
 
     public void addLink(Node node, Distance distance) { this.links.put(node, distance); }
+
+    public String toString() {
+        return this.name + "(" + this.id + ")";
+    }
 }

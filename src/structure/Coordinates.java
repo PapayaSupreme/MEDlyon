@@ -1,6 +1,3 @@
 package structure;
 
-public record Coordinates() {
-    private final double latitude;
-
-}
+public record Coordinates(double latitude, double longitude) {}
