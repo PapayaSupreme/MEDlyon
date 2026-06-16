@@ -1,4 +1,4 @@
-package parsers;
+package legacy;
 
 import structure.BusStop;
 import structure.Coordinates;
@@ -9,6 +9,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static utilities.Tools.haversineMeters;
+import static utilities.Tools.stripQuotes;
 
 /**
  * Simple parser that reads a GTFS `stops.txt` and creates one BusStop instance per row.
@@ -84,34 +87,5 @@ public class BusStopsParser {
         }
 
         return stops;
-    }
-
-    private static String stripQuotes(String s) {
-        if (s == null) return "";
-        s = s.trim();
-        if (s.length() >= 2 && s.startsWith("\"") && s.endsWith("\"")) {
-            return s.substring(1, s.length() - 1);
-        }
-        return s;
-    }
-
-    // Haversine formula -> distance in meters between two lat/lon points
-    private static double haversineMeters(double lat1, double lon1, double lat2, double lon2) {
-        final double R = 6371000; // Earth radius in m
-        double dLat = Math.toRadians(lat2 - lat1);
-        double dLon = Math.toRadians(lon2 - lon1);
-        double a = Math.sin(dLat/2) * Math.sin(dLat/2)
-                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
-                * Math.sin(dLon/2) * Math.sin(dLon/2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        return R * c;
-    }
-
-    // Small main for quick manual test
-    static void main(String[] args) throws Exception {
-        String path = args.length > 0 ? args[0] : "raw_datasets/bus/lyon_tcl/stops.txt";
-        List<BusStop> stops = parse(path);
-        System.out.println("Loaded stops: " + stops.size());
-        if (!stops.isEmpty()) System.out.println("First: " + stops.get(0) + " links=" + stops.get(0).getLinks().size());
     }
 }

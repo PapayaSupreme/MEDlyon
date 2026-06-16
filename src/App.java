@@ -24,7 +24,7 @@ public class App{
 
         System.out.println("\nParsing stop_times from: " + stopTimesPath);
         BusParser.Result result = BusParser.parseStopTimes(stopTimesPath, tripsPath, stops);
-        Map<String, Bus> buses = result.transports;
+        Map<String, Bus> buses = result.transports();
         System.out.println("Parsed trips/buses: " + buses.size());
         shown = 0;
         for (Map.Entry<String, Bus> e : buses.entrySet()) {
@@ -39,8 +39,8 @@ public class App{
         // show reverse mapping example: pick first stop_id and list serving trips/routes
         if (!stops.isEmpty()) {
             String anyStopId = stops.keySet().iterator().next();
-            System.out.println("\nExample stop_id=" + anyStopId + " served by trips=" + result.stopToTrips.getOrDefault(anyStopId, java.util.List.of()).size()
-                    + " routes=" + result.stopToRoutes.getOrDefault(anyStopId, java.util.List.of()).size());
+            System.out.println("\nExample stop_id=" + anyStopId + " served by trips=" + result.stopToTrips().getOrDefault(anyStopId, java.util.List.of()).size()
+                    + " routes=" + result.stopToRoutes().getOrDefault(anyStopId, java.util.List.of()).size());
         }
         System.out.println("Ordered stops of a bus line: ");
         for (Map.Entry<String, Bus> e : buses.entrySet()) {

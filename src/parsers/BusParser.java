@@ -12,6 +12,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static utilities.Tools.haversineMeters;
+import static utilities.Tools.stripQuotes;
+
 /**
  * Simple GTFS-based bus parser that builds Bus (trip) objects and links
  * consecutive stops based on stop_times stop_sequence.
@@ -39,7 +42,7 @@ public class BusParser {
 				if (h.equalsIgnoreCase("stop_lon")) idxLon = i;
 			}
 			String line;
-			int genId = 1_000_000; // for non-numeric stop ids
+
 			while ((line = br.readLine()) != null) {
 				if (line.trim().isEmpty()) continue;
 				String[] r = line.split(",", -1);
@@ -85,17 +88,14 @@ public class BusParser {
 		return tripToRoute;
 	}
 
-	public static class Result {
-		public final Map<String, Bus> transports;
-		public final Map<String, List<String>> stopToTrips;
-		public final Map<String, List<String>> stopToRoutes;
-
-		public Result(Map<String, Bus> transports, Map<String, List<String>> stopToTrips, Map<String, List<String>> stopToRoutes) {
-			this.transports = transports;
-			this.stopToTrips = stopToTrips;
-			this.stopToRoutes = stopToRoutes;
-		}
-	}
+	public record Result(
+					Map<String,
+					Bus> transports,
+					Map<String,
+					List<String>> stopToTrips,
+					Map<String,
+					List<String>> stopToRoutes
+	) {}
 
 	public static Result parseStopTimes(String stopTimesPath, String tripsPath, Map<String, BusStop> stopsById) throws IOException {
 		// map trip_id -> Bus
@@ -144,8 +144,8 @@ public class BusParser {
 				bus.addStop(stop, seq);
 
 				// reverse mappings
-				stopToTrips.computeIfAbsent(stopId, k -> new java.util.ArrayList<>()).add(tripId);
-				if (routeId != null) stopToRoutes.computeIfAbsent(stopId, k -> new java.util.ArrayList<>()).add(routeId);
+				stopToTrips.computeIfAbsent(stopId, _ -> new java.util.ArrayList<>()).add(tripId);
+				if (routeId != null) stopToRoutes.computeIfAbsent(stopId, _ -> new java.util.ArrayList<>()).add(routeId);
 			}
 		}
 
@@ -164,39 +164,5 @@ public class BusParser {
 		}
 
 		return new Result(transports, stopToTrips, stopToRoutes);
-	}
-
-	// (optional) you can implement parseTrips if you want trip->route mapping
-
-	private static String stripQuotes(String s) {
-		if (s == null) return "";
-		s = s.trim();
-		if (s.length() >= 2 && s.startsWith("\"") && s.endsWith("\"")) return s.substring(1, s.length() - 1);
-		return s;
-	}
-
-	// Haversine formula -> distance in meters between two lat/lon points
-	private static double haversineMeters(double lat1, double lon1, double lat2, double lon2) {
-		final double R = 6371000; // Earth radius in m
-		double dLat = Math.toRadians(lat2 - lat1);
-		double dLon = Math.toRadians(lon2 - lon1);
-		double a = Math.sin(dLat/2) * Math.sin(dLat/2)
-				+ Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
-				* Math.sin(dLon/2) * Math.sin(dLon/2);
-		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-		return R * c;
-	}
-
-	// quick main for manual testing
-	public static void main(String[] args) throws Exception {
-		String base = args.length > 0 ? args[0] : "raw_datasets/bus/lyon_tcl";
-		String stopsPath = base + "/stops.txt";
-		String tripsPath = base + "/trips.txt";
-		String stopTimesPath = base + "/stop_times.txt";
-
-		Map<String, BusStop> stops = parseStops(stopsPath);
-		System.out.println("Parsed stops: " + stops.size());
-		Result res = parseStopTimes(stopTimesPath, tripsPath, stops);
-		System.out.println("Parsed trips/buses: " + res.transports.size());
 	}
 }
