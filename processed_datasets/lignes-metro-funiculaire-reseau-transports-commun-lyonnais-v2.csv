@@ -2,12 +2,8 @@
 1;C;C-2;C;NOM;Cuire - Hôtel de Ville  Louis Pradel;Retour;30036;30021;Cuire;Hôtel de Ville L.Pradel;MET
 2;C;C-1;C;NOM;Hôtel de Ville  Louis Pradel - Cuire;Aller;30021;30036;Hôtel de Ville L.Pradel;Cuire;MET
 369;D;D-1;D;NOM;Gare de Vaise - Gare de Vénissieux;Aller;30052;30175;Gare de Vaise-G.Collomb;Gare de Vénissieux;MET
-370;F1;F1-2;F1;NOM;Saint-Just - Vieux Lyon;Retour;30054;30049;St Just;Vieux Lyon Cat.St Jean;FUN
 364;A;A-1;A;NOM;Perrache - Vaulx-en-Velin La Soie;Aller;30017;31750;Perrache.;Vaulx-en-Velin La Soie;MET
 365;A;A-2;A;NOM;Vaulx-en-Velin La Soie - Perrache;Retour;31770;30178;Vaulx-en-Velin La Soie.;Perrache;MET
-371;F1;F1-1;F1;NOM;Vieux Lyon - Saint-Just;Aller;30049;30054;Vieux Lyon Cat.St Jean;St Just;FUN
-372;F2;F2-1;F2;NOM;Vieux Lyon - Fourviere;Aller;30049;30055;Vieux Lyon Cat.St Jean;Fourvière Basilique;FUN
 367;B;B-4;B;NOM;ST-GENIS-LAVAL Hop. Sud. - Charpennes Charles Hernu .;Retour;34665;30024;St-Genis-Laval Hôp. Sud.;Charpennes Charles Hernu .;MET
 366;B;B-3;B;NOM;Charpennes Charles Hernu . - ST-GENIS-LAVAL Hop. Sud;Aller;30024;34664;Charpennes Charles Hernu .;St-Genis-Laval Hôp. Sud;MET
-373;F2;F2-2;F2;NOM;Fourviere - Vieux Lyon;Retour;30055;30049;Fourvière Basilique;Vieux Lyon Cat.St Jean;FUN
 368;D;D-2;D;NOM;Gare de Vénissieux - Gare de Vaise;Retour;31820;31834;Gare de Vénissieux.;Gare de Vaise-GCollomb;MET
