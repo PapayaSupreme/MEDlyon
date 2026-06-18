@@ -5,6 +5,13 @@ import structure.Node;
 
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.Comparator;
+
+import Core.Dijkstra;
+import Core.Dijkstra.ShortestPathsResult;
+import structure.Graph;
+
 
 public class App{
     public static void main(String[] args) throws Exception{
@@ -50,5 +57,73 @@ public class App{
             }
             break;
         }
+
+
+
+        // build graph and add all parsed stops as nodes
+        Graph g = new Graph();
+        for (BusStop bs : stops.values()) {
+            g.addNode(bs);
+        }
+
+        // pick source/target from up to 5 candidate stops (configurable by CLI indexes)
+        Node source = null;
+        Node target = null;
+        List<BusStop> sortedStops = new ArrayList<>(stops.values());
+        sortedStops.sort(Comparator.comparing(BusStop::getId));
+
+        int candidatesCount = Math.min(5, sortedStops.size());
+        if (candidatesCount > 0) {
+            System.out.println("\nStart/target candidates (1-based index):");
+            for (int i = 0; i < candidatesCount; i++) {
+                BusStop c = sortedStops.get(i);
+                System.out.println(" [" + (i + 1) + "] " + c.getId() + " - " + c.getName());
+            }
+
+            int defaultStartIndex = 1;
+            int defaultTargetIndex = Math.min(2, candidatesCount);
+
+            int startIndex = defaultStartIndex;
+            int targetIndex = defaultTargetIndex;
+
+            if (args.length > 1) {
+                try { startIndex = Integer.parseInt(args[1]); } catch (NumberFormatException ignored) {}
+            }
+            if (args.length > 2) {
+                try { targetIndex = Integer.parseInt(args[2]); } catch (NumberFormatException ignored) {}
+            }
+
+            if (startIndex < 1 || startIndex > candidatesCount) startIndex = defaultStartIndex;
+            if (targetIndex < 1 || targetIndex > candidatesCount) targetIndex = defaultTargetIndex;
+
+            source = sortedStops.get(startIndex - 1);
+            target = sortedStops.get(targetIndex - 1);
+
+            System.out.println("Selected start: [" + startIndex + "] " + source);
+            System.out.println("Selected target: [" + targetIndex + "] " + target);
+        }
+
+        if (source == null) {
+            System.out.println("No stops parsed, skipping shortest-path example.");
+            return;
+        }
+
+        ShortestPathsResult res = Dijkstra.computeShortestPaths(g, source);
+
+        // distance in meters from source to target
+        double meters = res.getDistance(target);
+
+        // get predecessor map or reconstruct the path
+        List<Node> path = res.reconstructPath(target);
+        if (path.isEmpty()) {
+            System.out.println("No path found");
+        } else {
+            System.out.println("Distance (m): " + meters);
+            System.out.println("Path:");
+            for (Node n : path) {
+                System.out.println("  " + n);
+            }
+        }
+
     }
 }

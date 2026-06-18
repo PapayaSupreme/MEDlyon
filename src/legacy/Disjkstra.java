@@ -1,4 +1,4 @@
-package Core;
+package legacy;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.util.ArrayList;
@@ -14,13 +14,13 @@ import structure.Node;
 import structure.Aline;
 import utilities.Costs;
 
-class Disjkstra {
-    static int idcount=0;
+//class Disjkstra {
+    //static int idcount=0;
 
     /**
      * This function, will calculate the path between two or more given nodes using a provided preferred travel method (Default=None)
      * It can also receive multiple different parameters to change it's behavior (Use -h/-help to find all the usable parameters.)
-     * 
+     *
      * @param Typetransfermap The map contains all the connections from we we can go from one Transport type to another.
      * @param originNode The starting node from which the path should begin.
      * @param destinationNode The Node to which we need to go to from originNode 
@@ -29,8 +29,8 @@ class Disjkstra {
      * @return A route between the two or more given paths.
      * @version 0.0.1
      * @throws InvalidAlgorithmParameterException if the arguments given contain another type than a String or a Node.
-    */
-    public static <NorS extends Object> Route Astar(Map<Node, Node> Typetransfermap, Node originNode,Node destinationNode,NorS... args) throws InvalidAlgorithmParameterException{
+     */
+    /*public static <NorS extends Object> Route Astar(Map<Node, Node> Typetransfermap, Node originNode,Node destinationNode,NorS... args) throws InvalidAlgorithmParameterException{
 
         //Variables to parse the arguments
         String parameter = "";
@@ -44,7 +44,7 @@ class Disjkstra {
 
         //Disjktra's algorithm variables
         Route path = new Route();
-        Set<String> preferedTtype; 
+        Set<String> preferedTtype;
         ArrayList<Aline> explored;
         Map<Node,Distance> sucessors;
         Map<Integer,Aline> way;
@@ -59,10 +59,10 @@ class Disjkstra {
                 }
                 Node nnode = (Node) arg;
                 //In this case this means that we will be doing dijkstra for multiple paths :
-                /**
-                 * We have originNode that is the first, destinationNode which is the second.
-                 * And all the other that we find in order will be 
-                 */
+
+                 // We have originNode that is the first, destinationNode which is the second.
+                 //And all the other that we find in order will be
+
                 //if (!Multiple_Stops){// This is the first Node that we find. Not needed.
                 Multiple_Stops = true;
                 stops.add(nnode);
@@ -131,7 +131,7 @@ class Disjkstra {
                 //Also add the links between different transport types. to search through
                 //WE NEED TO TEST IF AN ALINE ALREADY EXITS FOR THE TWO NODES AND REMOVE THE ONE WITH THE WORST (higher) SCORE.
                 //explored = explored.stream().filter().collect(List::ARRAYLIST)
-                
+
                 //Reiterate to find the lowest cost for all of the explored nodes.
                 nextNode = explored.stream().filter((n)-> n.getresearch()).min(Comparator.comparing(Aline::getCost)).get().getNode(snode);
             }
@@ -140,7 +140,7 @@ class Disjkstra {
             prevNode = dnode;
             way = new HashMap<>();
             while (prevNode != snode) {
-                
+
             }
             path.addToRoute(way);
 
@@ -151,3 +151,4 @@ class Disjkstra {
         return path;
     }
 }
+*/
