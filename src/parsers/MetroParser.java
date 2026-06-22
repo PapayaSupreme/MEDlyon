@@ -54,7 +54,7 @@ public class MetroParser {
                     double lat = Double.parseDouble(sLat);
                     double lon = Double.parseDouble(sLon);
                     MetroStation ms = new MetroStation(id, name, new Coordinates(lat, lon));
-                    stations.put(id, ms); // On peut aussi indexer par "name" si besoin
+                    stations.put(id, ms); // si ca ne marche pas, faut remplacer (id, ms) par (name, ms)
                 } catch (NumberFormatException e) {
                     // Ligne d'en-tête mal lue ou donnée corrompue ignorée
                 }
@@ -75,7 +75,7 @@ public class MetroParser {
             int idxStationCourante = -1;
             int idxStationSuivante = -1;
             
-            // Détection automatique des colonnes adaptées à ta modification
+            // Détection automatique des colonnes adaptées à la modification
             for (int i = 0; i < cols.length; i++) {
                 String h = cols[i].trim().replace("\"", "");
                 if (h.equalsIgnoreCase("station_courante") || h.equalsIgnoreCase("station_id")) {
@@ -94,7 +94,7 @@ public class MetroParser {
                 String currentId = idxStationCourante >= 0 && idxStationCourante < r.length ? stripQuotes(r[idxStationCourante]) : "";
                 String nextId = idxStationSuivante >= 0 && idxStationSuivante < r.length ? stripQuotes(r[idxStationSuivante]) : "";
                 
-                // Si la ligne n'a pas de station suivante (ex: terminus), on passe à la suite
+                // Si la ligne n'a pas de station suivante, on passe à la suite
                 if (currentId.isEmpty() || nextId.isEmpty() || nextId.equalsIgnoreCase("null") || nextId.equalsIgnoreCase("-")) {
                     continue;
                 }
