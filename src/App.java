@@ -15,7 +15,7 @@ import structure.Graph;
 
 
 public class App{
-    public static void main(String[] args) throws Exception{
+    static void main(String[] args) throws Exception{
         String base = args.length > 0 ? args[0] : "raw_datasets/bus/lyon_tcl";
         String stopsPath = base + "/stops.txt";
         String tripsPath = base + "/trips.txt";

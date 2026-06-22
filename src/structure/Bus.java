@@ -1,7 +1,7 @@
 package structure;
 
 public class Bus extends Transport{
-    private String routeId;
+    private final String routeId;
 
     public Bus(String id, String routeId) { super(id); this.routeId = routeId; }
 
