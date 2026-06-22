@@ -108,5 +108,5 @@ def traiter_dossier(pdf_folder, csv_output):
             writer.writerow([station, ligne, sens, horaires_str])
 
     print("CSV généré :", csv_output)
-traiter_dossier("..\\raw_data\\horaire theorique", "horaires_tcl.csv")
+traiter_dossier("..\\raw_dataset\\horaire theorique", "horaires_tcl.csv")
     
