@@ -1,6 +1,6 @@
 package parsers;
 
-import structure.MetroStation;
+import structure.MetroStop;
 import structure.Coordinates;
 import structure.Distance;
 import structure.Node;
@@ -17,15 +17,15 @@ import static utilities.Tools.stripQuotes;
 public class MetroParser {
 
     /**
-     * Lit le fichier des stations de métro et crée les objets MetroStation.
+     * Lit le fichier des Stops de métro et crée les objets MetroStop.
      * Utilise le délimiteur ";" propre aux fichiers CSV tcl.
      */
-    public static Map<String, MetroStation> parseStations(String path) throws IOException {
-        Map<String, MetroStation> stations = new HashMap<>();
+    public static Map<String, MetroStop> parseStops(String path) throws IOException {
+        Map<String, MetroStop> Stops = new HashMap<>();
         
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             String header = br.readLine();
-            if (header == null) return stations;
+            if (header == null) return Stops;
             
             String[] cols = header.split(";", -1);
             int idxId = -1, idxName = -1, idxLat = -1, idxLon = -1;
@@ -53,36 +53,36 @@ public class MetroParser {
                 try {
                     double lat = Double.parseDouble(sLat);
                     double lon = Double.parseDouble(sLon);
-                    MetroStation ms = new MetroStation(id, name, new Coordinates(lat, lon));
-                    stations.put(id, ms); // On peut aussi indexer par "name" si besoin
+                    MetroStop ms = new MetroStop(id, name, new Coordinates(lat, lon));
+                    Stops.put(id, ms); // On peut aussi indexer par "name" si besoin
                 } catch (NumberFormatException e) {
                     // Ligne d'en-tête mal lue ou donnée corrompue ignorée
                 }
             }
         }
-        return stations;
+        return Stops;
     }
 
     /**
-     *Lit le fichier horaires_tcl.csv modifié et relie les stations entre elles.
+     *Lit le fichier horaires_tcl.csv modifié et relie les Stops entre elles.
      */
-    public static void parseAndLinkHoraires(String path, Map<String, MetroStation> stationsMap) throws IOException {
+    public static void parseAndLinkHoraires(String path, Map<String, MetroStop> StopsMap) throws IOException {
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             String header = br.readLine();
             if (header == null) return;
             
             String[] cols = header.split(";", -1);
-            int idxStationCourante = -1;
-            int idxStationSuivante = -1;
+            int idxStopCourante = -1;
+            int idxStopSuivante = -1;
             
             // Détection automatique des colonnes adaptées à ta modification
             for (int i = 0; i < cols.length; i++) {
                 String h = cols[i].trim().replace("\"", "");
-                if (h.equalsIgnoreCase("station_courante") || h.equalsIgnoreCase("station_id")) {
-                    idxStationCourante = i;
+                if (h.equalsIgnoreCase("Stop_courante") || h.equalsIgnoreCase("Stop_id")) {
+                    idxStopCourante = i;
                 }
-                if (h.equalsIgnoreCase("station_suivante") || h.equalsIgnoreCase("next_station")) {
-                    idxStationSuivante = i;
+                if (h.equalsIgnoreCase("Stop_suivante") || h.equalsIgnoreCase("next_Stop")) {
+                    idxStopSuivante = i;
                 }
             }
 
@@ -91,27 +91,27 @@ public class MetroParser {
                 if (line.trim().isEmpty()) continue;
                 String[] r = line.split(";", -1);
                 
-                String currentId = idxStationCourante >= 0 && idxStationCourante < r.length ? stripQuotes(r[idxStationCourante]) : "";
-                String nextId = idxStationSuivante >= 0 && idxStationSuivante < r.length ? stripQuotes(r[idxStationSuivante]) : "";
+                String currentId = idxStopCourante >= 0 && idxStopCourante < r.length ? stripQuotes(r[idxStopCourante]) : "";
+                String nextId = idxStopSuivante >= 0 && idxStopSuivante < r.length ? stripQuotes(r[idxStopSuivante]) : "";
                 
-                // Si la ligne n'a pas de station suivante (ex: terminus), on passe à la suite
+                // Si la ligne n'a pas de Stop suivante (ex: terminus), on passe à la suite
                 if (currentId.isEmpty() || nextId.isEmpty() || nextId.equalsIgnoreCase("null") || nextId.equalsIgnoreCase("-")) {
                     continue;
                 }
                 
-                MetroStation currentStation = stationsMap.get(currentId);
-                MetroStation nextStation = stationsMap.get(nextId);
+                MetroStop currentStop = StopsMap.get(currentId);
+                MetroStop nextStop = StopsMap.get(nextId);
                 
-                // Si les deux stations existent bien dans notre carte, on crée le lien
-                if (currentStation != null && nextStation != null) {
+                // Si les deux Stops existent bien dans notre carte, on crée le lien
+                if (currentStop != null && nextStop != null) {
                     double d = haversineMeters(
-                        currentStation.getCoordinates().latitude(), currentStation.getCoordinates().longitude(),
-                        nextStation.getCoordinates().latitude(), nextStation.getCoordinates().longitude()
+                        currentStop.getCoordinates().latitude(), currentStop.getCoordinates().longitude(),
+                        nextStop.getCoordinates().latitude(), nextStop.getCoordinates().longitude()
                     );
                     
                     // Ajout du lien bidirectionnel (aller-retour)
-                    currentStation.addLink(nextStation, new Distance(d));
-                    nextStation.addLink(currentStation, new Distance(d));
+                    currentStop.addLink(nextStop, new Distance(d));
+                    nextStop.addLink(currentStop, new Distance(d));
                 }
             }
         }
