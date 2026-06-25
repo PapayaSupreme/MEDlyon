@@ -1,2 +1,4 @@
 .idea/
 out/
+processed_datasets/
+legacy_datasets/
