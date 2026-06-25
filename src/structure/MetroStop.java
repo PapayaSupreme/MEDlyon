@@ -1,9 +1,17 @@
 package structure;
 
+
 public class MetroStop extends Node {
 
-    public MetroStop(String id, String name, Coordinates coordinates) {
+    private final String desserte;
+
+    public MetroStop(String id, String name, Coordinates coordinates, String desserte) {
         super(id, name, coordinates);
+        this.desserte = desserte;
+    }
+
+    public String getDesserte() {
+        return desserte;
     }
 
     @Override
