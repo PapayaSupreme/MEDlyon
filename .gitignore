@@ -1,2 +1,5 @@
 .idea/
 out/
+processed_datasets/
+legacy_datasets/
+raw_datasets/bus/lyon_tcl/

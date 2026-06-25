@@ -1,168 +1,119 @@
 package parsers;
 
-import structure.Metro;
 import structure.MetroStop;
 import structure.Coordinates;
 import structure.Distance;
+import structure.Node;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static utilities.Tools.haversineMeters;
 import static utilities.Tools.stripQuotes;
 
-/**
- * Simple GTFS-based bus parser that builds Metro (trip) objects and links
- * consecutive stops based on stop_times stop_sequence.
- */
 public class MetroParser {
 
     /**
-     * Parse stops.txt and return a map stop_id -> MetroStop.
-     * stop_id is kept as string keys because GTFS allows non-numeric ids.
-     * MetroStop instances use integer ids; non-numeric stop_ids receive generated ids.
+     * Lit le fichier des Stops de métro et crée les objets MetroStop.
+     * Utilise le délimiteur ";" propre aux fichiers CSV tcl.
      */
     public static Map<String, MetroStop> parseStops(String path) throws IOException {
-        Map<String, MetroStop> stops = new HashMap<>();
+        Map<String, MetroStop> Stops = new HashMap<>();
+        
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             String header = br.readLine();
-            if (header == null) return stops;
-            String[] cols = header.split(",", -1);
-            // locate required columns
-            int idxStopId = -1, idxName = -1, idxLat = -1, idxLon = -1;
+            if (header == null) return Stops;
+            
+            String[] cols = header.split(";", -1);
+            int idxId = -1, idxName = -1, idxLat = -1, idxLon = -1;
+            
             for (int i = 0; i < cols.length; i++) {
                 String h = cols[i].trim().replace("\"", "");
-                if (h.equalsIgnoreCase("stop_id")) idxStopId = i;
-                if (h.equalsIgnoreCase("stop_name")) idxName = i;
-                if (h.equalsIgnoreCase("stop_lat")) idxLat = i;
-                if (h.equalsIgnoreCase("stop_lon")) idxLon = i;
+                if (h.equalsIgnoreCase("id") || h.contains("stop_id")) idxId = i;
+                if (h.equalsIgnoreCase("nom") || h.contains("stop_name")) idxName = i;
+                if (h.equalsIgnoreCase("lat") || h.contains("stop_lat")) idxLat = i;
+                if (h.equalsIgnoreCase("lon") || h.contains("stop_lon")) idxLon = i;
             }
-            String line;
 
+            String line;
             while ((line = br.readLine()) != null) {
                 if (line.trim().isEmpty()) continue;
-                String[] r = line.split(",", -1);
-                String sid = idxStopId >= 0 && idxStopId < r.length ? stripQuotes(r[idxStopId]) : "";
+                String[] r = line.split(";", -1);
+                
+                String id = idxId >= 0 && idxId < r.length ? stripQuotes(r[idxId]) : "";
                 String name = idxName >= 0 && idxName < r.length ? stripQuotes(r[idxName]) : "";
                 String sLat = idxLat >= 0 && idxLat < r.length ? stripQuotes(r[idxLat]) : "";
                 String sLon = idxLon >= 0 && idxLon < r.length ? stripQuotes(r[idxLon]) : "";
-                if (sid.isEmpty() || sLat.isEmpty() || sLon.isEmpty()) continue;
+                
+                if (id.isEmpty() || sLat.isEmpty() || sLon.isEmpty()) continue;
+                
                 try {
                     double lat = Double.parseDouble(sLat);
                     double lon = Double.parseDouble(sLon);
-                    MetroStop bs = new MetroStop(sid, name, new Coordinates(lat, lon));
-                    stops.put(sid, bs);
+                    MetroStop ms = new MetroStop(id, name, new Coordinates(lat, lon));
+                    Stops.put(id, ms); // On peut aussi indexer par "name" si besoin
                 } catch (NumberFormatException e) {
-                    // ignore
+                    // Ligne d'en-tête mal lue ou donnée corrompue ignorée
                 }
             }
         }
-        return stops;
+        return Stops;
     }
 
-    private static Map<String, String> parseTrips(String path) throws IOException {
-        Map<String, String> tripToRoute = new HashMap<>();
+    /**
+     *Lit le fichier horaires_tcl.csv modifié et relie les Stops entre elles.
+     */
+    public static void parseAndLinkHoraires(String path, Map<String, MetroStop> StopsMap) throws IOException {
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             String header = br.readLine();
-            if (header == null) return tripToRoute;
-            String[] cols = header.split(",", -1);
-            int idxTrip = -1, idxRoute = -1;
+            if (header == null) return;
+            
+            String[] cols = header.split(";", -1);
+            int idxStopCourante = -1;
+            int idxStopSuivante = -1;
+            
+            // Détection automatique des colonnes adaptées à ta modification
             for (int i = 0; i < cols.length; i++) {
                 String h = cols[i].trim().replace("\"", "");
-                if (h.equalsIgnoreCase("trip_id")) idxTrip = i;
-                if (h.equalsIgnoreCase("route_id")) idxRoute = i;
-            }
-            String line;
-            while ((line = br.readLine()) != null) {
-                if (line.trim().isEmpty()) continue;
-                String[] r = line.split(",", -1);
-                String tripId = idxTrip >= 0 && idxTrip < r.length ? stripQuotes(r[idxTrip]) : null;
-                String routeId = idxRoute >= 0 && idxRoute < r.length ? stripQuotes(r[idxRoute]) : null;
-                if (tripId != null && routeId != null) tripToRoute.put(tripId, routeId);
-            }
-        }
-        return tripToRoute;
-    }
-
-    public record Result(
-            Map<String,
-                    Metro> transports,
-            Map<String,
-                    List<String>> stopToTrips,
-            Map<String,
-                    List<String>> stopToRoutes
-    ) {}
-
-    public static Result parseStopTimes(String stopTimesPath, String tripsPath, Map<String, MetroStop> stopsById) throws IOException {
-        // map trip_id -> Metro
-        Map<String, Metro> transports = new HashMap<>();
-
-        // map stop_id -> list of trip_ids
-        Map<String, List<String>> stopToTrips = new HashMap<>();
-        Map<String, List<String>> stopToRoutes = new HashMap<>();
-
-        // load trip -> route mapping
-        Map<String, String> tripToRoute = parseTrips(tripsPath);
-
-        try (BufferedReader br = new BufferedReader(new FileReader(stopTimesPath))) {
-            String header = br.readLine();
-            if (header == null) return new Result(transports, stopToTrips, stopToRoutes);
-            String[] cols = header.split(",", -1);
-            int idxTrip = -1, idxStop = -1, idxSeq = -1;
-            for (int i = 0; i < cols.length; i++) {
-                String h = cols[i].trim().replace("\"", "");
-                if (h.equalsIgnoreCase("trip_id")) idxTrip = i;
-                if (h.equalsIgnoreCase("stop_id")) idxStop = i;
-                if (h.equalsIgnoreCase("stop_sequence")) idxSeq = i;
-            }
-
-            String line;
-            while ((line = br.readLine()) != null) {
-                if (line.trim().isEmpty()) continue;
-                String[] r = line.split(",", -1);
-                String tripId = idxTrip >= 0 && idxTrip < r.length ? stripQuotes(r[idxTrip]) : null;
-                String stopId = idxStop >= 0 && idxStop < r.length ? stripQuotes(r[idxStop]) : null;
-                String seqS = idxSeq >= 0 && idxSeq < r.length ? stripQuotes(r[idxSeq]) : null;
-                if (tripId == null || stopId == null || seqS == null) continue;
-                int seq;
-                try { seq = Integer.parseInt(seqS); } catch (NumberFormatException e) { continue; }
-
-                MetroStop stop = stopsById.get(stopId);
-                if (stop == null) continue;
-
-                String routeId = tripToRoute.get(tripId);
-
-                Metro bus = transports.get(tripId);
-                if (bus == null) {
-                    bus = new Metro(tripId, routeId);
-                    transports.put(tripId, bus);
+                if (h.equalsIgnoreCase("Stop_courante") || h.equalsIgnoreCase("Stop_id")) {
+                    idxStopCourante = i;
                 }
-                bus.addStop(stop, seq);
+                if (h.equalsIgnoreCase("Stop_suivante") || h.equalsIgnoreCase("next_Stop")) {
+                    idxStopSuivante = i;
+                }
+            }
 
-                // reverse mappings
-                stopToTrips.computeIfAbsent(stopId, _ -> new java.util.ArrayList<>()).add(tripId);
-                if (routeId != null) stopToRoutes.computeIfAbsent(stopId, _ -> new java.util.ArrayList<>()).add(routeId);
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
+                String[] r = line.split(";", -1);
+                
+                String currentId = idxStopCourante >= 0 && idxStopCourante < r.length ? stripQuotes(r[idxStopCourante]) : "";
+                String nextId = idxStopSuivante >= 0 && idxStopSuivante < r.length ? stripQuotes(r[idxStopSuivante]) : "";
+                
+                // Si la ligne n'a pas de Stop suivante (ex: terminus), on passe à la suite
+                if (currentId.isEmpty() || nextId.isEmpty() || nextId.equalsIgnoreCase("null") || nextId.equalsIgnoreCase("-")) {
+                    continue;
+                }
+                
+                MetroStop currentStop = StopsMap.get(currentId);
+                MetroStop nextStop = StopsMap.get(nextId);
+                
+                // Si les deux Stops existent bien dans notre carte, on crée le lien
+                if (currentStop != null && nextStop != null) {
+                    double d = haversineMeters(
+                        currentStop.getCoordinates().latitude(), currentStop.getCoordinates().longitude(),
+                        nextStop.getCoordinates().latitude(), nextStop.getCoordinates().longitude()
+                    );
+                    
+                    // Ajout du lien bidirectionnel (aller-retour)
+                    currentStop.addLink(nextStop, new Distance(d));
+                    nextStop.addLink(currentStop, new Distance(d));
+                }
             }
         }
-
-        // After building transports, link consecutive stops with Distance edges
-        for (Metro bus : transports.values()) {
-            List<structure.Node> ordered = bus.getStopsOrdered();
-            for (int i = 0; i + 1 < ordered.size(); i++) {
-                structure.Node a = ordered.get(i);
-                structure.Node b = ordered.get(i + 1);
-                double d = haversineMeters(a.getCoordinates().latitude(), a.getCoordinates().longitude(),
-                        b.getCoordinates().latitude(), b.getCoordinates().longitude());
-                // add bidirectional link between stops representing service edge
-                a.addLink(b, new Distance(d));
-                b.addLink(a, new Distance(d));
-            }
-        }
-
-        return new Result(transports, stopToTrips, stopToRoutes);
     }
 }
