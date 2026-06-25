@@ -22,46 +22,55 @@ public class MetroParser {
      */
     public static Map<String, MetroStop> parseStops(String path) throws IOException {
         Map<String, MetroStop> Stops = new HashMap<>();
-        
+
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             String header = br.readLine();
             if (header == null) return Stops;
-            
+
+            // Enlever un éventuel "#"
+            header = header.replace("#", "");
+
             String[] cols = header.split(";", -1);
-            int idxId = -1, idxName = -1, idxLat = -1, idxLon = -1;
-            
+            int idxId = -1, idxName = -1, idxDesserte = -1, idxLat = -1, idxLon = -1;
+
             for (int i = 0; i < cols.length; i++) {
                 String h = cols[i].trim().replace("\"", "");
-                if (h.equalsIgnoreCase("id") || h.contains("stop_id")) idxId = i;
-                if (h.equalsIgnoreCase("nom") || h.contains("stop_name")) idxName = i;
-                if (h.equalsIgnoreCase("lat") || h.contains("stop_lat")) idxLat = i;
-                if (h.equalsIgnoreCase("lon") || h.contains("stop_lon")) idxLon = i;
+                if (h.equalsIgnoreCase("id_station")) idxId = i;
+                if (h.equalsIgnoreCase("nom")) idxName = i;
+                if (h.equalsIgnoreCase("desserte")) idxDesserte = i;
+                if (h.equalsIgnoreCase("lat")) idxLat = i;
+                if (h.equalsIgnoreCase("lon")) idxLon = i;
             }
 
             String line;
             while ((line = br.readLine()) != null) {
                 if (line.trim().isEmpty()) continue;
                 String[] r = line.split(";", -1);
-                
-                String id = idxId >= 0 && idxId < r.length ? stripQuotes(r[idxId]) : "";
-                String name = idxName >= 0 && idxName < r.length ? stripQuotes(r[idxName]) : "";
-                String sLat = idxLat >= 0 && idxLat < r.length ? stripQuotes(r[idxLat]) : "";
-                String sLon = idxLon >= 0 && idxLon < r.length ? stripQuotes(r[idxLon]) : "";
-                
+
+                String id = idxId >= 0 ? stripQuotes(r[idxId]) : "";
+                String name = idxName >= 0 ? stripQuotes(r[idxName]) : "";
+                String desserte = idxDesserte >= 0 ? stripQuotes(r[idxDesserte]) : "";
+                String sLat = idxLat >= 0 ? stripQuotes(r[idxLat]) : "";
+                String sLon = idxLon >= 0 ? stripQuotes(r[idxLon]) : "";
+
                 if (id.isEmpty() || sLat.isEmpty() || sLon.isEmpty()) continue;
-                
+
                 try {
-                    double lat = Double.parseDouble(sLat);
-                    double lon = Double.parseDouble(sLon);
-                    MetroStop ms = new MetroStop(id, name, new Coordinates(lat, lon));
-                    Stops.put(id, ms); // On peut aussi indexer par "name" si besoin
+                    double lat = Double.parseDouble(sLat.replace(",", "."));
+                    double lon = Double.parseDouble(sLon.replace(",", "."));
+
+                    MetroStop ms = new MetroStop(id, name, new Coordinates(lat, lon), desserte);
+                    Stops.put(id, ms);
+
                 } catch (NumberFormatException e) {
-                    // Ligne d'en-tête mal lue ou donnée corrompue ignorée
+                    // ignore
                 }
             }
         }
         return Stops;
     }
+
+
 
     /**
      *Lit le fichier horaires_tcl.csv modifié et relie les Stops entre elles.
@@ -70,11 +79,11 @@ public class MetroParser {
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             String header = br.readLine();
             if (header == null) return;
-            
+
             String[] cols = header.split(";", -1);
             int idxStopCourante = -1;
             int idxStopSuivante = -1;
-            
+
             // Détection automatique des colonnes adaptées à ta modification
             for (int i = 0; i < cols.length; i++) {
                 String h = cols[i].trim().replace("\"", "");
@@ -90,25 +99,25 @@ public class MetroParser {
             while ((line = br.readLine()) != null) {
                 if (line.trim().isEmpty()) continue;
                 String[] r = line.split(";", -1);
-                
+
                 String currentId = idxStopCourante >= 0 && idxStopCourante < r.length ? stripQuotes(r[idxStopCourante]) : "";
                 String nextId = idxStopSuivante >= 0 && idxStopSuivante < r.length ? stripQuotes(r[idxStopSuivante]) : "";
-                
+
                 // Si la ligne n'a pas de Stop suivante (ex: terminus), on passe à la suite
                 if (currentId.isEmpty() || nextId.isEmpty() || nextId.equalsIgnoreCase("null") || nextId.equalsIgnoreCase("-")) {
                     continue;
                 }
-                
+
                 MetroStop currentStop = StopsMap.get(currentId);
                 MetroStop nextStop = StopsMap.get(nextId);
-                
+
                 // Si les deux Stops existent bien dans notre carte, on crée le lien
                 if (currentStop != null && nextStop != null) {
                     double d = haversineMeters(
-                        currentStop.getCoordinates().latitude(), currentStop.getCoordinates().longitude(),
-                        nextStop.getCoordinates().latitude(), nextStop.getCoordinates().longitude()
+                            currentStop.getCoordinates().latitude(), currentStop.getCoordinates().longitude(),
+                            nextStop.getCoordinates().latitude(), nextStop.getCoordinates().longitude()
                     );
-                    
+
                     // Ajout du lien bidirectionnel (aller-retour)
                     currentStop.addLink(nextStop, new Distance(d));
                     nextStop.addLink(currentStop, new Distance(d));
