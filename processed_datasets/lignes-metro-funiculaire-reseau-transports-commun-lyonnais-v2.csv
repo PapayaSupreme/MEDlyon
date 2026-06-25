@@ -1,9 +1,0 @@
-﻿gid;ligne;code_trace;code_ligne;type_trace;nom_trace;sens;origine;destination;nom_origine;nom_destination;famille_transport;couleur;couleur_hex;date_debut;date_fin;code_type_ligne;nom_type_ligne;pmr;code_tri_ligne;nom_version;last_update;last_update_fme
-1;C;C-2;C;NOM;Cuire - Hôtel de Ville  Louis Pradel;Retour;30036;30021;Cuire;Hôtel de Ville L.Pradel;MET
-2;C;C-1;C;NOM;Hôtel de Ville  Louis Pradel - Cuire;Aller;30021;30036;Hôtel de Ville L.Pradel;Cuire;MET
-369;D;D-1;D;NOM;Gare de Vaise - Gare de Vénissieux;Aller;30052;30175;Gare de Vaise-G.Collomb;Gare de Vénissieux;MET
-364;A;A-1;A;NOM;Perrache - Vaulx-en-Velin La Soie;Aller;30017;31750;Perrache.;Vaulx-en-Velin La Soie;MET
-365;A;A-2;A;NOM;Vaulx-en-Velin La Soie - Perrache;Retour;31770;30178;Vaulx-en-Velin La Soie.;Perrache;MET
-367;B;B-4;B;NOM;ST-GENIS-LAVAL Hop. Sud. - Charpennes Charles Hernu .;Retour;34665;30024;St-Genis-Laval Hôp. Sud.;Charpennes Charles Hernu .;MET
-366;B;B-3;B;NOM;Charpennes Charles Hernu . - ST-GENIS-LAVAL Hop. Sud;Aller;30024;34664;Charpennes Charles Hernu .;St-Genis-Laval Hôp. Sud;MET
-368;D;D-2;D;NOM;Gare de Vénissieux - Gare de Vaise;Retour;31820;31834;Gare de Vénissieux.;Gare de Vaise-GCollomb;MET
