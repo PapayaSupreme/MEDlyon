@@ -1,3 +1,5 @@
+package Autre;
+
 import parsers.MetroParser;
 import structure.Metro;
 import structure.MetroStop;
@@ -10,12 +12,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-public class App {
+public class AppAlt {
 
     public static void main(String[] args) throws IOException {
-        String stationsFile = "processed_datasets/stations-metro-reseau-transports-commun-lyonnais.csv";
-        String lignesFile = "processed_datasets/lignes-metro-funiculaire-reseau-transports-commun-lyonnais-v2 (1).csv";
-        String horairesFile = "processed_datasets/horaires_tcl.csv";
+        String stationsFile = "raw_datasets/metro/stations-metro-reseau-transports-commun-lyonnais.csv";
+        String lignesFile = "raw_datasets/metro/lignes-metro-funiculaire-reseau-transports-commun-lyonnais-v2 (1).csv";
+        String horairesFile = "raw_datasets/metro/horaires_tcl.csv";
 
         // 1) Charger les MetroStop via MetroParser
         Map<String, MetroStop> stopsByIdOrName = MetroParser.parseStops(stationsFile);

@@ -1,46 +1,60 @@
-package structure;
-
 import parsers.MetroParser;
 import structure.Metro;
-import structure.MetroStation;
+import structure.MetroStop;
 import structure.Node;
 import structure.Graph;
 import parsers.BusParser;
 import structure.Bus;
 import structure.BusStop;
-import structure.Node;
+import structure.Distance;
+import structure.Coordinates;
 
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.Scanner;
+import java.io.File;
+import java.io.BufferedReader;
+import java.io.FileReader;
 
 import Core.Dijkstra;
 import Core.Dijkstra.ShortestPathsResult;
-import structure.Graph;
+
+import static utilities.Tools.haversineMeters;
 
 
 public class App{
+    // Transfer distance threshold
+    private static final double TRANSFER_DISTANCE_THRESHOLD = 120.0;
+    
     static void main(String[] args) throws Exception{
-        String base = args.length > 0 ? args[0] : "raw_datasets/bus/lyon_tcl";
-        String stopsPath = base + "/stops.txt";
-        String tripsPath = base + "/trips.txt";
-        String stopTimesPath = base + "/stop_times.txt";
+        String baseBus = args.length > 0 ? args[0] : "raw_datasets/bus/lyon_tcl";
+        String baseMetro = args.length > 1 ? args[1] : "raw_datasets/metro";
+        
+        String stopsPath = baseBus + "/stops.txt";
+        String tripsPath = baseBus + "/trips.txt";
+        String stopTimesPath = baseBus + "/stop_times.txt";
 
-        System.out.println("Parsing stops from: " + stopsPath);
-        Map<String, BusStop> stops = BusParser.parseStops(stopsPath);
-        System.out.println("Parsed stops: " + stops.size());
+        // Parse Bus Stops and Trips
+        System.out.println("=".repeat(60));
+        System.out.println("PARSING BUS NETWORK");
+        System.out.println("=".repeat(60));
+        
+        System.out.println("Parsing bus stops from: " + stopsPath);
+        Map<String, BusStop> busStops = BusParser.parseStops(stopsPath);
+        System.out.println("✓ Parsed " + busStops.size() + " bus stops");
         int shown = 0;
-        for (Map.Entry<String, BusStop> e : stops.entrySet()) {
+        for (Map.Entry<String, BusStop> e : busStops.entrySet()) {
             if (shown++ >= 5) break;
             System.out.println(" stop_id=" + e.getKey() + " -> " + e.getValue());
         }
 
-        System.out.println("\nParsing stop_times from: " + stopTimesPath);
-        BusParser.Result result = BusParser.parseStopTimes(stopTimesPath, tripsPath, stops);
+        System.out.println("\nParsing bus stop_times from: " + stopTimesPath);
+        BusParser.Result result = BusParser.parseStopTimes(stopTimesPath, tripsPath, busStops);
         Map<String, Bus> buses = result.transports();
-        System.out.println("Parsed trips/buses: " + buses.size());
+        System.out.println("✓ Parsed " + buses.size() + " bus routes");
         shown = 0;
         for (Map.Entry<String, Bus> e : buses.entrySet()) {
             if (shown++ >= 5) break;
@@ -51,9 +65,8 @@ public class App{
             }
         }
 
-        // show reverse mapping example: pick first stop_id and list serving trips/routes
-        if (!stops.isEmpty()) {
-            String anyStopId = stops.keySet().iterator().next();
+        if (!busStops.isEmpty()) {
+            String anyStopId = busStops.keySet().iterator().next();
             System.out.println("\nExample stop_id=" + anyStopId + " served by trips=" + result.stopToTrips().getOrDefault(anyStopId, java.util.List.of()).size()
                     + " routes=" + result.stopToRoutes().getOrDefault(anyStopId, java.util.List.of()).size());
         }
@@ -66,26 +79,163 @@ public class App{
             break;
         }
 
+        // Parse Metro Stops and Network
+        System.out.println("\n" + "=".repeat(60));
+        System.out.println("PARSING METRO NETWORK");
+        System.out.println("=".repeat(60));
+        
+        Map<String, MetroStop> metroStops = new java.util.HashMap<>();
+        Map<String, Metro> metros = new java.util.HashMap<>();
+        
+        try {
+            String metroStationsPath = baseMetro + "/stations-metro-reseau-transports-commun-lyonnais.csv";
+            String metroHorairesPath = baseMetro + "/horaires_tcl.csv";
+            File stationsFile = new File(metroStationsPath);
+            File horairesFile = new File(metroHorairesPath);
+            
+            if (stationsFile.exists() && horairesFile.exists()) {
+                // Load metro stops by id
+                System.out.println("Parsing metro stops from: " + metroStationsPath);
+                metroStops = MetroParser.parseStops(metroStationsPath);
+                System.out.println("✓ Parsed " + metroStops.size() + " metro stops");
+                
+                // Build index by name for horaires matching
+                Map<String, MetroStop> stopsByName = new java.util.HashMap<>();
+                for (MetroStop ms : metroStops.values()) {
+                    System.out.println(ms.getName());
+                    if (ms.getName() != null && !ms.getName().isEmpty()) {
+                        stopsByName.put(ms.getName().trim(), ms);
+                    }
+                }
+                
+                // Link metro stops together
+                System.out.println("Linking metro stops from: " + metroHorairesPath);
+                MetroParser.parseAndLinkHoraires(metroHorairesPath, metroStops);
+                System.out.println("✓ Metro stops linked");
+                
+                // Build Metro objects (one instance per line+direction)
+                Map<String, List<MetroStop>> orderMap = new java.util.LinkedHashMap<>();
+                
+                try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(metroHorairesPath))) {
+                    String header = br.readLine(); // skip header
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        if (line.trim().isEmpty()) continue;
+                        String[] cols = line.split(";", -1);
+                        if (cols.length < 2) continue;
+                        
+                        String stationName = cols[0].trim();
+                        String ligne = cols.length > 1 ? cols[1].trim() : "";
+                        String sens = cols.length > 2 ? cols[2].trim() : "";
+                        
+                        if (ligne.isEmpty() || sens.isEmpty() || stationName.isEmpty()) continue;
+                        
+                        String key = ligne + "|" + sens;
+                        MetroStop ms = stopsByName.get(stationName);
+                        if (ms == null) {
+                            // try cleaning quotes/spaces
+                            String cleaned = stationName.replace("\"", "").trim();
+                            ms = stopsByName.get(cleaned);
+                        }
+                        if (ms == null) {
+                            // try partial match: horaires names are often longer (e.g. "Charpennes" vs "Charpennes Charles Hernu")
+                            for (Map.Entry<String, MetroStop> entry : stopsByName.entrySet()) {
+                                if (stationName.contains(entry.getKey()) || entry.getKey().contains(stationName.split(" ")[0])) {
+                                    ms = entry.getValue();
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        if (ms != null) {
+                            orderMap.computeIfAbsent(key, k -> new java.util.ArrayList<>());
+                            List<MetroStop> stopList = orderMap.get(key);
+                            // avoid duplicates
+                            if (stopList.isEmpty() || !stopList.get(stopList.size() - 1).equals(ms)) {
+                                if (!stopList.contains(ms)) stopList.add(ms);
+                            }
+                        }
+                    }
+                }
+                
+                // Create Metro objects
+                for (Map.Entry<String, List<MetroStop>> e : orderMap.entrySet()) {
+                    String key = e.getKey();
+                    String[] parts = key.split("\\|", 2);
+                    String ligne = parts[0];
+                    String sens = parts.length > 1 ? parts[1] : "unknown";
+                    String metroId = ligne + "_" + sens;
+                    Metro metro = new Metro(metroId, ligne);
+                    List<MetroStop> stopsList = e.getValue();
+                    int seq = 1;
+                    for (MetroStop ms : stopsList) {
+                        metro.addStop(ms, seq++);
+                    }
+                    metros.put(key, metro);
+                }
+                
+                System.out.println("✓ Created " + metros.size() + " metro lines (line|direction)");
+                shown = 0;
+                for (Map.Entry<String, Metro> e : metros.entrySet()) {
+                    if (shown++ >= 5) break;
+                    Metro m = e.getValue();
+                    List<Node> ordered = m.getStopsOrdered();
+                    System.out.println(" line=" + m.getRouteId() + " direction=" + e.getKey().split("\\|")[1] + " stops=" + ordered.size());
+                }
+            } else {
+                System.out.println("⚠ Metro dataset files not found at: " + metroStationsPath + " or " + metroHorairesPath);
+            }
+        } catch (Exception e) {
+            System.out.println("⚠ Error parsing metro data: " + e.getMessage());
+            e.printStackTrace();
+        }
 
-
-        // build graph and add all parsed stops as nodes
+        // Build integrated graph with bus and metro stops
+        System.out.println("\n" + "=".repeat(60));
+        System.out.println("BUILDING INTEGRATED NETWORK");
+        System.out.println("=".repeat(60));
+        
         Graph g = new Graph();
-        for (BusStop bs : stops.values()) {
+        
+        // Add all bus stops
+        for (BusStop bs : busStops.values()) {
             g.addNode(bs);
         }
+        System.out.println("✓ Added " + busStops.size() + " bus stops to graph");
+        
+        // Add all metro stops
+        for (MetroStop ms : metroStops.values()) {
+            g.addNode(ms);
+        }
+        System.out.println("✓ Added " + metroStops.size() + " metro stops to graph");
+        
+        // Create transfer links between nearby bus and metro stops
+        if (!metroStops.isEmpty() && !busStops.isEmpty()) {
+            createTransferLinks(busStops, metroStops);
+            System.out.println("✓ Transfer links created between bus and metro stops");
+        }
+        
+        System.out.println("✓ Total nodes in graph: " + g.getNodes().size());
+
+        // Combine all stops for selection and sorting
+        List<Node> allStops = new ArrayList<>();
+        allStops.addAll(busStops.values());
+        allStops.addAll(metroStops.values());
+        allStops.sort(Comparator.comparing(Node::getId));
 
         // pick source/target from up to 5 candidate stops (configurable by CLI indexes)
         Node source = null;
         Node target = null;
-        List<BusStop> sortedStops = new ArrayList<>(stops.values());
-        sortedStops.sort(Comparator.comparing(BusStop::getId));
 
-        int candidatesCount = Math.min(5, sortedStops.size());
+        int candidatesCount = Math.min(5, allStops.size());
         if (candidatesCount > 0) {
-            System.out.println("\nStart/target candidates (1-based index):");
+            System.out.println("\n" + "=".repeat(60));
+            System.out.println("START/TARGET CANDIDATES");
+            System.out.println("=".repeat(60));
             for (int i = 0; i < candidatesCount; i++) {
-                BusStop c = sortedStops.get(i);
-                System.out.println(" [" + (i + 1) + "] " + c.getId() + " - " + c.getName());
+                Node c = allStops.get(i);
+                String type = c instanceof MetroStop ? "🚇 METRO" : "🚌 BUS";
+                System.out.println(" [" + (i + 1) + "] " + type + " " + c.getId() + " - " + c.getName());
             }
 
             int defaultStartIndex = 1;
@@ -94,18 +244,18 @@ public class App{
             int startIndex = defaultStartIndex;
             int targetIndex = defaultTargetIndex;
 
-            if (args.length > 1) {
-                try { startIndex = Integer.parseInt(args[1]); } catch (NumberFormatException ignored) {}
-            }
             if (args.length > 2) {
-                try { targetIndex = Integer.parseInt(args[2]); } catch (NumberFormatException ignored) {}
+                try { startIndex = Integer.parseInt(args[2]); } catch (NumberFormatException ignored) {}
+            }
+            if (args.length > 3) {
+                try { targetIndex = Integer.parseInt(args[3]); } catch (NumberFormatException ignored) {}
             }
 
             if (startIndex < 1 || startIndex > candidatesCount) startIndex = defaultStartIndex;
             if (targetIndex < 1 || targetIndex > candidatesCount) targetIndex = defaultTargetIndex;
 
-            source = sortedStops.get(startIndex - 1);
-            target = sortedStops.get(targetIndex - 1);
+            source = allStops.get(startIndex - 1);
+            target = allStops.get(targetIndex - 1);
 
             System.out.println("Selected start: [" + startIndex + "] " + source);
             System.out.println("Selected target: [" + targetIndex + "] " + target);
@@ -116,6 +266,10 @@ public class App{
             return;
         }
 
+        System.out.println("\n" + "=".repeat(60));
+        System.out.println("DIJKSTRA SHORTEST PATH COMPUTATION");
+        System.out.println("=".repeat(60));
+        
         ShortestPathsResult res = Dijkstra.computeShortestPaths(g, source);
 
         // distance in meters from source to target
@@ -124,21 +278,48 @@ public class App{
         // get predecessor map or reconstruct the path
         List<Node> path = res.reconstructPath(target);
         if (path.isEmpty()) {
-            System.out.println("No path found");
+            System.out.println("✗ No path found");
         } else {
+            System.out.println("✓ Path found!");
             System.out.println("Distance (m): " + meters);
-            System.out.println("Path:");
-            for (Node n : path) {
-                System.out.println("  " + n);
+            System.out.println("Number of stops: " + path.size());
+            System.out.println("\nItinerary:");
+            for (int i = 0; i < path.size(); i++) {
+                Node n = path.get(i);
+                String type = n instanceof MetroStop ? "🚇" : "🚌";
+                System.out.println("  " + (i + 1) + ". " + type + " " + n);
             }
         }
 
         // Interactive menu for route searching
-        interactiveRouteSearch(g, sortedStops);
+        interactiveRouteSearch(g, allStops);
 
     }
 
-    private static void interactiveRouteSearch(Graph g, List<BusStop> allStops) {
+    /**
+     * Creates bidirectional transfer links between nearby bus and metro stops.
+     * Stops within TRANSFER_DISTANCE_THRESHOLD meters are connected.
+     */
+    private static void createTransferLinks(Map<String, BusStop> busStops, Map<String, MetroStop> metroStops) {
+        int transferCount = 0;
+        for (BusStop busStop : busStops.values()) {
+            for (MetroStop metroStop : metroStops.values()) {
+                double distance = haversineMeters(
+                    busStop.getCoordinates().latitude(), busStop.getCoordinates().longitude(),
+                    metroStop.getCoordinates().latitude(), metroStop.getCoordinates().longitude()
+                );
+                
+                if (distance <= TRANSFER_DISTANCE_THRESHOLD) {
+                    busStop.addLink(metroStop, new Distance(distance));
+                    metroStop.addLink(busStop, new Distance(distance));
+                    transferCount++;
+                }
+            }
+        }
+        System.out.println("  Created " + transferCount + " transfer connections (threshold=" + TRANSFER_DISTANCE_THRESHOLD + "m)");
+    }
+
+    private static void interactiveRouteSearch(Graph g, List<Node> allStops) {
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("\n" + "=".repeat(60));
@@ -179,8 +360,10 @@ public class App{
             System.out.println("\n" + "-".repeat(60));
             System.out.println("ROUTE SEARCH RESULTS");
             System.out.println("-".repeat(60));
-            System.out.println("From: " + departNode.getName() + " (" + departNode.getId() + ")");
-            System.out.println("To:   " + arriveNode.getName() + " (" + arriveNode.getId() + ")");
+            String departType = departNode instanceof MetroStop ? "🚇 METRO" : "🚌 BUS";
+            String arriveType = arriveNode instanceof MetroStop ? "🚇 METRO" : "🚌 BUS";
+            System.out.println("From: " + departType + " " + departNode.getName() + " (" + departNode.getId() + ")");
+            System.out.println("To:   " + arriveType + " " + arriveNode.getName() + " (" + arriveNode.getId() + ")");
 
             if (path.isEmpty()) {
                 System.out.println("\n✗ No route found between these stops.");
@@ -192,20 +375,24 @@ public class App{
 
                 for (int i = 0; i < path.size(); i++) {
                     Node stop = path.get(i);
-                    System.out.println("  " + (i + 1) + ". " + stop.getName() + " (" + stop.getId() + ")");
+                    String type = stop instanceof MetroStop ? "🚇" : "🚌";
+                    System.out.println("  " + (i + 1) + ". " + type + " " + stop.getName() + " (" + stop.getId() + ")");
                 }
 
                 // Calculate and display segment distances
                 System.out.println("\nDetailed segments:");
-                double cumulativeDistance = 0.0;
                 for (int i = 0; i < path.size() - 1; i++) {
                     Node currentStop = path.get(i);
                     Node nextStop = path.get(i + 1);
-                    double segmentDistance = distance;
+                    Map<Node, Distance> links = currentStop.getLinks();
                     
-                    // Try to calculate segment distance (if available in graph edges)
-                    // This depends on how edges store distance information
-                    System.out.println("  " + (i + 1) + " -> " + (i + 2) + ": " + currentStop.getName() + " to " + nextStop.getName());
+                    if (links.containsKey(nextStop)) {
+                        double segmentDistance = links.get(nextStop).meters();
+                        String currentType = currentStop instanceof MetroStop ? "🚇" : "🚌";
+                        String nextType = nextStop instanceof MetroStop ? "🚇" : "🚌";
+                        System.out.println("  " + (i + 1) + " → " + (i + 2) + ": " + currentType + " " + currentStop.getName() 
+                            + " to " + nextType + " " + nextStop.getName() + " (" + String.format("%.0f", segmentDistance) + "m)");
+                    }
                 }
             }
 
@@ -217,7 +404,7 @@ public class App{
         System.out.println("\nGoodbye!");
     }
 
-    private static Node selectStop(Scanner scanner, List<BusStop> allStops, String label) {
+    private static Node selectStop(Scanner scanner, List<Node> allStops, String label) {
         while (true) {
             System.out.println("\nSelect mode:");
             System.out.println("  [1] Enter stop number");
@@ -238,11 +425,12 @@ public class App{
         }
     }
 
-    private static Node selectByNumber(Scanner scanner, List<BusStop> allStops, String label) {
+    private static Node selectByNumber(Scanner scanner, List<Node> allStops, String label) {
         System.out.println("\nAvailable stops:");
         for (int i = 0; i < allStops.size(); i++) {
-            BusStop stop = allStops.get(i);
-            System.out.println("  [" + (i + 1) + "] " + stop.getId() + " - " + stop.getName());
+            Node stop = allStops.get(i);
+            String type = stop instanceof MetroStop ? "🚇" : "🚌";
+            System.out.println("  [" + (i + 1) + "] " + type + " " + stop.getId() + " - " + stop.getName());
         }
 
         while (true) {
@@ -259,8 +447,9 @@ public class App{
                     System.out.println("Invalid index. Please try again.");
                     continue;
                 }
-                BusStop selected = allStops.get(index);
-                System.out.println("✓ Selected: " + selected.getName() + " (" + selected.getId() + ")");
+                Node selected = allStops.get(index);
+                String type = selected instanceof MetroStop ? "🚇 METRO" : "🚌 BUS";
+                System.out.println("✓ Selected: " + type + " " + selected.getName() + " (" + selected.getId() + ")");
                 return selected;
             } catch (NumberFormatException e) {
                 System.out.println("Invalid input. Please enter a number.");
@@ -268,7 +457,7 @@ public class App{
         }
     }
 
-    private static Node selectBySearch(Scanner scanner, List<BusStop> allStops, String label) {
+    private static Node selectBySearch(Scanner scanner, List<Node> allStops, String label) {
         System.out.print("Enter stop name to search (or 'b' to go back): ");
         String searchTerm = scanner.nextLine().trim().toLowerCase();
 
@@ -276,8 +465,8 @@ public class App{
             return selectStop(scanner, allStops, label);
         }
 
-        List<BusStop> matches = new ArrayList<>();
-        for (BusStop stop : allStops) {
+        List<Node> matches = new ArrayList<>();
+        for (Node stop : allStops) {
             if (stop.getName().toLowerCase().contains(searchTerm)) {
                 matches.add(stop);
             }
@@ -290,8 +479,9 @@ public class App{
 
         System.out.println("\nFound " + matches.size() + " matching stops:");
         for (int i = 0; i < matches.size(); i++) {
-            BusStop stop = matches.get(i);
-            System.out.println("  [" + (i + 1) + "] " + stop.getId() + " - " + stop.getName());
+            Node stop = matches.get(i);
+            String type = stop instanceof MetroStop ? "🚇" : "🚌";
+            System.out.println("  [" + (i + 1) + "] " + type + " " + stop.getId() + " - " + stop.getName());
         }
 
         while (true) {
@@ -308,8 +498,9 @@ public class App{
                     System.out.println("Invalid index. Please try again.");
                     continue;
                 }
-                BusStop selected = matches.get(index);
-                System.out.println("✓ Selected: " + selected.getName() + " (" + selected.getId() + ")");
+                Node selected = matches.get(index);
+                String type = selected instanceof MetroStop ? "🚇 METRO" : "🚌 BUS";
+                System.out.println("✓ Selected: " + type + " " + selected.getName() + " (" + selected.getId() + ")");
                 return selected;
             } catch (NumberFormatException e) {
                 System.out.println("Invalid input. Please enter a number.");

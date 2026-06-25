@@ -56,7 +56,7 @@ public class MetroParser {
                     MetroStop ms = new MetroStop(id, name, new Coordinates(lat, lon));
                     Stops.put(id, ms); // On peut aussi indexer par "name" si besoin
                 } catch (NumberFormatException e) {
-                    // Ligne d'en-tête mal lue ou donnée corrompue ignorée
+                    System.out.println(e.getMessage());
                 }
             }
         }
