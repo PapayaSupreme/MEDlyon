@@ -1,3 +1,10 @@
+package structure;
+
+import parsers.MetroParser;
+import structure.Metro;
+import structure.MetroStation;
+import structure.Node;
+import structure.Graph;
 import parsers.BusParser;
 import structure.Bus;
 import structure.BusStop;
