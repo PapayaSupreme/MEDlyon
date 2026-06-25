@@ -4,3 +4,29 @@ processed_datasets/
 legacy_datasets/
 raw_datasets/bus/lyon_tcl/
 raw_datasets/metro
+
+#HTML Server : Gitignore
+# Logs
+Server/roulyon/logs
+Server/roulyon/*.log
+Server/roulyon/npm-debug.log*
+Server/roulyon/yarn-debug.log*
+Server/roulyon/yarn-error.log*
+Server/roulyon/pnpm-debug.log*
+Server/roulyon/lerna-debug.log*
+
+Server/roulyon/node_modules
+Server/roulyon/dist
+Server/roulyon/dist-ssr
+Server/roulyon/*.local
+
+# Editor directories and files
+Server/roulyon/.vscode/*
+Server/roulyon/!.vscode/extensions.json
+Server/roulyon/.idea
+Server/roulyon/.DS_Store
+Server/roulyon/*.suo
+Server/roulyon/*.ntvs*
+Server/roulyon/*.njsproj
+Server/roulyon/*.sln
+Server/roulyon/*.sw?
