@@ -32,21 +32,15 @@ jobs:
             with:
                 name: application.jar
 
-          #- name: DownloadDatasets
-          #  run: |
-          #      chmod +x raw_datasets/Datasets_download.sh
-          #      ./raw_datasets/Datasets_download.sh
-
-          - name: curl test
-            uses: enflo/curl-action@2942c5316f0d493fdc1bf64020382b4aa597a128
-            with:
-                curl: -o "raw_datasets/metro/stations-metro-reseau-transports-commun-lyonnais.csv" -L "https://drive.usercontent.google.com/download?id=17hCUhL46OkZ6Am4ykDPDuCzSqhw_r0y-" --create-dirs 
+          - name: DownloadDatasets
+            run: |
+                chmod +x raw_datasets/Datasets_download.sh
+                ./raw_datasets/Datasets_download.sh
 
           - name: VerifySetup
             run: |
                 pwd
                 ls *
-
           - name: LaunchApplication 
         # Original command :
         # java -cp application.jar src/App.java raw_datasets/bus/lyontcl raw_datasets/metro -noCli > out.txt 2> err.txt
