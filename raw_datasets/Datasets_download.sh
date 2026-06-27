@@ -45,9 +45,9 @@
 
 #The curl command that are not used are to limit the amount of download done each time when github performs the action.
 
-curl -fsSL "https://drive.usercontent.google.com/download?id=15gYhnrVg9B7p1QEf143FMG0-8Ieb2ieb" --create-dirs > "raw_datasets/metro/horaires_tcl.csv" 
-#curl -fsSL "https://drive.usercontent.google.com/download?id=1Q8iHKB9dEe3Gkj3tUOcZZRuRaTfoLtIJ" > "raw_datasets/metro/lignes-metro-funiculaire-reseau-transports-commun-lyonnais.csv" 
-curl -fsSL "https://drive.usercontent.google.com/download?id=17hCUhL46OkZ6Am4ykDPDuCzSqhw_r0y-" > "raw_datasets/metro/stations-metro-reseau-transports-commun-lyonnais.csv"
+curl -fsSL "https://drive.usercontent.google.com/download?id=15gYhnrVg9B7p1QEf143FMG0-8Ieb2ieb" > "horaires_tcl.csv" 
+#curl -fsSL "https://drive.usercontent.google.com/download?id=1Q8iHKB9dEe3Gkj3tUOcZZRuRaTfoLtIJ" > "lignes-metro-funiculaire-reseau-transports-commun-lyonnais.csv" 
+curl -fsSL "https://drive.usercontent.google.com/download?id=17hCUhL46OkZ6Am4ykDPDuCzSqhw_r0y-" > "stations-metro-reseau-transports-commun-lyonnais.csv"
 
 
 
