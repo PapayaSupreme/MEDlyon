@@ -40,8 +40,10 @@ jobs:
                 distribution: 'oracle'
 
           - name: LaunchApplication 
+        # Original command :
+        # java -cp application.jar src/App.java raw_datasets/bus/lyontcl raw_datasets/metro -noCli > out.txt 2> err.txt
             run: |
-                java -cp application.jar src/App.java raw_datasets/bus/lyontcl raw_datasets/metro -noCli > out.txt 2> err.txt
+                java -cp application.jar src/App.java raw_datasets/bus/lyontcl raw_datasets/metro -noCli 
 
                 if git status -s | grep -x "** err.txt"; then
                     echo "❌ There was an error :"
