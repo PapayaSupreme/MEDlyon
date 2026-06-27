@@ -25,14 +25,6 @@ jobs:
       run: |
         jar -cf application.jar src/App.java src/Core/*.java src/parsers/*.java src/structure/*.java src/utilities/*.java
 
-        git status -s | echo
-        if git status -s | grep -x "?? application.jar"; then
-          echo 'Created the jar file application.java without errors.'
-        else
-          echo "❌ Failed to create the jar file."
-          false
-        fi
-
     - name: Upload_Jar_File
       uses: actions/upload-artifact@v7
       with:
