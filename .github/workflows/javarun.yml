@@ -42,7 +42,8 @@ jobs:
 
           - name: VerifySetup
             run: |
-                ls
+                pwd
+                ls *
           - name: LaunchApplication 
         # Original command :
         # java -cp application.jar src/App.java raw_datasets/bus/lyontcl raw_datasets/metro -noCli > out.txt 2> err.txt
