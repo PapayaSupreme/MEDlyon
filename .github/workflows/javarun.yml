@@ -39,7 +39,10 @@ jobs:
                 chmod +x raw_datasets/Datasets_download.sh
                 ./raw_datasets/Datasets_download.sh
 
+                curl -L "https://drive.usercontent.google.com/download?id=1y1JWkDTyFtSttHzhAsDBwhIqMWeYFHSY" -o 'raw_datasets/bus/lyon_tcl/trips.txt' --create-dirs
+
                 ls *
+            #temporary curl test outside the shell file
 
           - name: VerifySetup
             run: |
