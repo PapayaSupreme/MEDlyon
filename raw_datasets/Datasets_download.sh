@@ -47,7 +47,7 @@ curl -o "raw_datasets/bus/lyon_tcl/stops.txt" -L "https://drive.usercontent.goog
 
 curl -o "raw_datasets/metro/horaires_tcl.csv" -L "https://drive.usercontent.google.com/download?id=15gYhnrVg9B7p1QEf143FMG0-8Ieb2ieb" --create-dirs
 #curl -o "raw_datasets/metro/lignes-metro-funiculaire-reseau-transports-commun-lyonnais.csv" -L "https://drive.usercontent.google.com/download?id=1Q8iHKB9dEe3Gkj3tUOcZZRuRaTfoLtIJ" 
-curl 'raw_datasets/metro/stations-metro-reseau-transports-commun-lyonnais.csv' -L "https://drive.usercontent.google.com/download?id=17hCUhL46OkZ6Am4ykDPDuCzSqhw_r0y-" -o 
+curl -o "raw_datasets/metro/stations-metro-reseau-transports-commun-lyonnais.csv" -L "https://drive.usercontent.google.com/download?id=17hCUhL46OkZ6Am4ykDPDuCzSqhw_r0y-" 
 
 
 
