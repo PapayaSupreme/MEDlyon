@@ -34,4 +34,6 @@ jobs:
     - name: Upload_Jar_File
       uses: actions/upload-artifact@v7
       with:
-        path: jars/latest
+        path: application.jar
+        archive: false #The jar files are already archived (zipped)
+        overwrite: true

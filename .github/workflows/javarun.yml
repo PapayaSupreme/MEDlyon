@@ -16,12 +16,14 @@ jobs:
           - name: Download_Jar_File 
             uses: actions/download-artifact@v8
             with:
-                path: jars/latest
+                name: application.jar
+
 
           - uses: actions/checkout@v7
             with:
                 sparse-checkout: |
                     raw_datasets/Datasets_download.sh
+                    src/App.java
                 sparse-checkout-cone-mode: false
 
           - name: DownloadDatasets
