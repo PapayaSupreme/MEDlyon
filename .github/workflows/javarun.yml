@@ -2,8 +2,8 @@
 name: Java CI
 
 on:
-  pull_request:
-    types: [opened, reopened]
+    pull_request:
+        types: [opened, edited, reopened]
 
 jobs:
     InvokeBuild:
@@ -49,5 +49,13 @@ jobs:
                 fi
 
 
+          - name: Upload_run_results
+            uses: actions/upload-artifact@v7
+            with:
+                name: Run
+                path: ./*.txt
+                if-no-files-found: ignore
+
+                
     #Now we can also test to launch the frontEnd application and 
                 
