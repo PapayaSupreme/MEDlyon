@@ -31,6 +31,8 @@ jobs:
 
     - name: Upload_Jar_File
       uses: actions/upload-artifact@v7
+      if: ${{ github.event_name != 'push' }}
+      # Runs only if this isn't a push, so we can have less artefacts uploaded.
       with:
         path: application.jar
         archive: false #The jar files are already archived (zipped)

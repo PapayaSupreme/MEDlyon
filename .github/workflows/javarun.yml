@@ -37,17 +37,12 @@ jobs:
                 chmod +x raw_datasets/Datasets_download.sh
                 ./raw_datasets/Datasets_download.sh
 
-          - name: VerifySetup
-            run: |
-                pwd
-                ls *
           - name: LaunchApplication 
-        # Original command :
-        # java -cp application.jar src/App.java raw_datasets/bus/lyontcl raw_datasets/metro -noCli > out.txt 2> err.txt
+            #Java arg[1]="." arg[2]="." arg[3]="-noCli" /: arg[1] is the bus path, arg[2] is the metro path, arg[3] is for the option.
             run: |
-                java -jar application.jar . . -noCli 
+                java -jar application.jar . . -noCli > o.txt 2> e.txt
 
-                if git status -s | grep -x "** err.txt"; then
+                if git status -s | grep -x "?? e.txt"; then
                     echo "❌ There was an error :"
                     cat err.txt | echo
                 else
@@ -58,7 +53,7 @@ jobs:
             uses: actions/upload-artifact@v7
             with:
                 name: Run
-                path: ./*.txt
+                path: ./[eo].txt
                 if-no-files-found: ignore
                 
     #Now we can also test to launch the frontEnd application and 
