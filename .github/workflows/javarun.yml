@@ -52,7 +52,7 @@ jobs:
                 if git status -s | grep -x "** err.txt"; then
                     echo "❌ There was an error :"
                     cat err.txt | echo
-                    else
+                else
                     echo 'The application ran and terminated normally.'
                 fi
 
