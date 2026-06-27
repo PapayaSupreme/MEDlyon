@@ -33,7 +33,7 @@ public class App{
         String baseBus = args.length > 0 ? args[0] : "raw_datasets/bus/lyon_tcl";
         String baseMetro = args.length > 1 ? args[1] : "raw_datasets/metro";
 
-        boolean cli = (args.length > 2) && (args[2]=="-noCli") ? false : true;
+        boolean cli = (args.length > 2) && (args[2].equals("-noCli")) ? false : true;
         
         String stopsPath = baseBus + "/stops.txt";
         String tripsPath = baseBus + "/trips.txt";

@@ -23,7 +23,11 @@ jobs:
 
     - name: Build Java application to jar file
       run: |
-        jar -cf application.jar src/App.java src/Core/*.java src/parsers/*.java src/structure/*.java src/utilities/*.java
+        cd ./src
+        javac App.java Core/*.java parsers/*.java structure/*.java utilities/*.java
+        jar -cfe ../application.jar App App.class Core/*.class parsers/*.class structure/*.class utilities/*.class
+        cd ../
+      # We build inside the src Folder to be able to use the imports that do not contains src. everytime.
 
     - name: Upload_Jar_File
       uses: actions/upload-artifact@v7

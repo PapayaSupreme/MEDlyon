@@ -19,7 +19,6 @@ jobs:
             with:
                 sparse-checkout: |
                     raw_datasets/Datasets_download.sh
-                    src/App.java
                 sparse-checkout-cone-mode: false
 
           - name: DownloadDatasets
@@ -38,8 +37,6 @@ jobs:
             with:
                 name: application.jar
 
-
-
           - name: VerifySetup
             run: |
                 pwd
@@ -48,7 +45,7 @@ jobs:
         # Original command :
         # java -cp application.jar src/App.java raw_datasets/bus/lyontcl raw_datasets/metro -noCli > out.txt 2> err.txt
             run: |
-                java -cp application.jar src/App.java raw_datasets/bus/lyontcl raw_datasets/metro -noCli 
+                java -jar application.jar raw_datasets/bus/lyontcl raw_datasets/metro -noCli 
 
                 if git status -s | grep -x "** err.txt"; then
                     echo "❌ There was an error :"
@@ -57,14 +54,12 @@ jobs:
                     echo 'The application ran and terminated normally.'
                 fi
 
-
           - name: Upload_run_results
             uses: actions/upload-artifact@v7
             with:
                 name: Run
                 path: ./*.txt
                 if-no-files-found: ignore
-
                 
     #Now we can also test to launch the frontEnd application and 
                 
