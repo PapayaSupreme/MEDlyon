@@ -2,16 +2,16 @@
 name: Java CI
 
 on:
-    pull_request:
-        types: [opened, edited, reopened]
     workflow_dispatch:
+    pull_request:
+        types: [opened, synchronize, reopened, review_requested]
 
 jobs:
     InvokeBuild:
         uses: ./.github/workflows/javabuild.yml
 
     RunJavaApp:
-        runs-on: [ubuntu-latest, windows-latest, macos-latest]
+        runs-on: ubuntu-latest
         steps:
             
           - name: Download_Jar_File 
