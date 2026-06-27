@@ -39,6 +39,10 @@ jobs:
                 java-version: '26'
                 distribution: 'oracle'
 
+
+          - name: VerifySetup
+            run: |
+                ls
           - name: LaunchApplication 
         # Original command :
         # java -cp application.jar src/App.java raw_datasets/bus/lyontcl raw_datasets/metro -noCli > out.txt 2> err.txt
