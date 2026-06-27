@@ -14,12 +14,6 @@ jobs:
         runs-on: ubuntu-latest
         needs: InvokeBuild
         steps:
-            
-          - name: Download_Jar_File 
-            uses: actions/download-artifact@v8
-            with:
-                name: application.jar
-
 
           - uses: actions/checkout@v7
             with:
@@ -38,6 +32,12 @@ jobs:
             with:
                 java-version: '26'
                 distribution: 'oracle'
+
+          - name: Download_Jar_File 
+            uses: actions/download-artifact@v8
+            with:
+                name: application.jar
+
 
 
           - name: VerifySetup
