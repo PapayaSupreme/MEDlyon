@@ -21,11 +21,6 @@ jobs:
                     raw_datasets/Datasets_download.sh
                 sparse-checkout-cone-mode: false
 
-          - name: DownloadDatasets
-            run: |
-                chmod +x raw_datasets/Datasets_download.sh
-                ./raw_datasets/Datasets_download.sh
-
           - name: Set up JDK 26
             uses: actions/setup-java@v5
             with:
@@ -36,6 +31,15 @@ jobs:
             uses: actions/download-artifact@v8
             with:
                 name: application.jar
+
+          - name: DownloadDatasets
+            run: |
+                pwd
+                ls *
+                chmod +x raw_datasets/Datasets_download.sh
+                ./raw_datasets/Datasets_download.sh
+
+                ls *
 
           - name: VerifySetup
             run: |
