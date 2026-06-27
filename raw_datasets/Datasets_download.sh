@@ -33,7 +33,7 @@ curl -fsSL "https://drive.usercontent.google.com/download?id=1y1JWkDTyFtSttHzhAs
 #curl -fsSL "https://drive.usercontent.google.com/download?id=105SVONlU-kcgqYUv50jlnYftTyzkS6vU" > id_mappings.txt
 #curl -fsSL "https://drive.usercontent.google.com/download?id=1uFlgr0VIMATCc2n2K3p074WLCIpbFUDG" > routes.txt
 #curl -fsSL "https://drive.usercontent.google.com/download?id=14ZFanoyzm6VtNT6y6B0M8F_9HVY1ryDA&confirm" > shapes.txt  #(/!\ TOO BIG CANNOT DIRECTLY DOWNLOAD)
-curl -fsSL "https://drive.usercontent.google.com/download?id=1MSZ9l3ur_IjNrx4iom7Af4dMLvhgbG7p&confirm" > Stop_times.txt  #Too big to download normally so we add &confirm to bypass the confirmation screen
+curl -fsSL "https://drive.usercontent.google.com/download?id=1MSZ9l3ur_IjNrx4iom7Af4dMLvhgbG7p&confirm" > stop_times.txt  #Too big to download normally so we add &confirm to bypass the confirmation screen
 curl -fsSL "https://drive.usercontent.google.com/download?id=1SWU4ytmigCsoPYn2juqbQ_d29NKATu19" > stops.txt
 #curl -fsSL "https://drive.usercontent.google.com/download?id=1Fy8Ip9c57B5M1SOwDNfe1l2EUmkd2Wwm" > transfers.txt
 
