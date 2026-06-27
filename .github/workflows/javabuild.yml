@@ -1,12 +1,8 @@
-# This workflow will build a Java project with Ant
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-ant
 
 name: Java CI
 
 on:
-  push:
-  pull_request:
-    types: [opened, reopened]
+  workflow_call:
 
 jobs:
   buildJavaApp:
@@ -18,17 +14,24 @@ jobs:
       with:
         sparse-checkout: |
           src
+
     - name: Set up JDK 26
       uses: actions/setup-java@v5
       with:
         java-version: '26'
         distribution: 'oracle'
+
     - name: Build Java application to jar file
       run: |
         jar -cf application.jar src/App.java src/Core/*.java src/parsers/*.java src/structure/*.java src/utilities/*.java
-        echo 'Created the jar file application.java without errors.'
-        
-# Launching the application to test if it runs. (First needs to download all the datasets.
-# java -cp application.jar src/App.java raw_datasets/bus/lyontcl
 
-#We also need the action to download the datasets.
+        if git status -s | grep -x "** application.jar"; then
+          echo 'Created the jar file application.java without errors.'
+        else
+          echo "❌ Failed to create the jar file."
+        fi
+
+    - name: Upload_Jar_File
+      uses: actions/upload-artifact@v7
+      with:
+        path: jars/latest

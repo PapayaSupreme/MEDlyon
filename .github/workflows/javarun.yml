@@ -1,0 +1,51 @@
+
+name: Java CI
+
+on:
+  pull_request:
+    types: [opened, reopened]
+
+jobs:
+    InvokeBuild:
+        uses: ./.github/workflows/javabuild.yml
+
+    RunJavaApp:
+        runs-on: [ubuntu-latest, windows-latest, macos-latest]
+        steps:
+            
+          - name: Download_Jar_File 
+            uses: actions/download-artifact@v8
+            with:
+                path: jars/latest
+
+          - uses: actions/checkout@v7
+            with:
+                sparse-checkout: |
+                    raw_datasets/Datasets_download.sh
+                sparse-checkout-cone-mode: false
+
+          - name: DownloadDatasets
+            run: |
+                chmod +x raw_datasets/Datasets_download.sh
+                ./raw_datasets/Datasets_download.sh
+
+          - name: Set up JDK 26
+            uses: actions/setup-java@v5
+            with:
+                java-version: '26'
+                distribution: 'oracle'
+
+          - name: LaunchApplication 
+            run: |
+                java -cp application.jar src/App.java raw_datasets/bus/lyontcl raw_datasets/metro -noCli > out.txt 2> err.txt
+
+                if git status -s | grep -x "** err.txt"; then
+                    echo "❌ There was an error :"
+                    cat err.txt | echo
+                    else
+                    echo 'The application ran and terminated normally.'
+                fi
+
+
+    #Now we can also test to launch the frontEnd application and 
+                

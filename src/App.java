@@ -32,6 +32,8 @@ public class App{
     static void main(String[] args) throws Exception{
         String baseBus = args.length > 0 ? args[0] : "raw_datasets/bus/lyon_tcl";
         String baseMetro = args.length > 1 ? args[1] : "raw_datasets/metro";
+
+        boolean cli = (args.length > 2) && (args[2]=="-noCli") ? false : true;
         
         String stopsPath = baseBus + "/stops.txt";
         String tripsPath = baseBus + "/trips.txt";
@@ -291,8 +293,10 @@ public class App{
             }
         }
 
-        // Interactive menu for route searching
-        interactiveRouteSearch(g, allStops);
+        // Interactive menu for route searching if the user did not purposefully refuse it.
+        if (cli){
+            interactiveRouteSearch(g, allStops);
+        }
 
     }
 

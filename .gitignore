@@ -1,6 +1,8 @@
 .idea/
 out/
+*node_modules*
 processed_datasets/
 legacy_datasets/
 raw_datasets/bus/lyon_tcl/
 raw_datasets/metro
+raw_datasets/Datasets_download_links.*
