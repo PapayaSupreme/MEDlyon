@@ -1,5 +1,5 @@
 
-name: Java CI
+name: Manual and Pull
 
 on:
     workflow_dispatch:
@@ -12,6 +12,7 @@ jobs:
 
     RunJavaApp:
         runs-on: ubuntu-latest
+        needs: InvokeBuild
         steps:
             
           - name: Download_Jar_File 

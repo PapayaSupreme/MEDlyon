@@ -1,5 +1,5 @@
 
-name: Java CI
+name: Common Workflow
 
 on:
   workflow_call:
