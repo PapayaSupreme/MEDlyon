@@ -1,0 +1,9 @@
+
+name: Push action
+
+on:
+    push:
+
+jobs:
+    InvokeBuild:
+        uses: ./.github/workflows/javabuild.yml

@@ -1,0 +1,39 @@
+
+name: Common Workflow
+
+on:
+  workflow_call:
+
+jobs:
+  buildJavaApp:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        sparse-checkout: |
+          src
+
+    - name: Set up JDK 26
+      uses: actions/setup-java@v5
+      with:
+        java-version: '26'
+        distribution: 'oracle'
+
+    - name: Build Java application to jar file
+      run: |
+        cd ./src
+        javac App.java Core/*.java parsers/*.java structure/*.java utilities/*.java
+        jar -cfe ../application.jar App App.class Core/*.class parsers/*.class structure/*.class utilities/*.class
+        cd ../
+      # We build inside the src Folder to be able to use the imports that do not contains src. everytime.
+
+    - name: Upload_Jar_File
+      uses: actions/upload-artifact@v7
+      if: ${{ github.event_name != 'push' }}
+      # Runs only if this isn't a push, so we can have less artefacts uploaded.
+      with:
+        path: application.jar
+        archive: false #The jar files are already archived (zipped)
+        overwrite: true
