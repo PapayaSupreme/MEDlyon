@@ -3,7 +3,6 @@ package parsers;
 import structure.MetroStop;
 import structure.Coordinates;
 import structure.Distance;
-import structure.Node;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

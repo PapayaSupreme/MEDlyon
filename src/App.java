@@ -1,37 +1,16 @@
-import parsers.MetroParser;
-import structure.Metro;
-import structure.MetroStop;
-import structure.MetroStop;
-import structure.Node;
-import structure.Graph;
-import parsers.BusParser;
-import structure.Bus;
-import structure.BusStop;
-import structure.Distance;
-import structure.Coordinates;
-import structure.Distance;
-import structure.Coordinates;
+import Core.*;
+import parsers.*;
+import structure.*;
+import utilities.Tools;
+import static utilities.Tools.haversineMeters;
 
-import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.Scanner;
 import java.io.File;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.text.Normalizer;
 import java.util.*;
-import java.io.File;
-import java.io.BufferedReader;
-import java.io.FileReader;
 
-import Core.Dijkstra;
-import Core.Dijkstra.ShortestPathsResult;
-import utilities.Tools;
 
-import static utilities.Tools.haversineMeters;
 
 
 public class App{
@@ -42,7 +21,7 @@ public class App{
         String baseBus = args.length > 0 ? args[0] : "raw_datasets/bus/lyon_tcl";
         String baseMetro = args.length > 1 ? args[1] : "raw_datasets/metro";
 
-        boolean cli = (args.length > 2) && (args[2].equals("-noCli")) ? false : true;
+        boolean cli = (args.length <= 2) || (!args[2].equals("-noCli"));
 
         String stopsPath = baseBus + "/stops.txt";
         String tripsPath = baseBus + "/trips.txt";
@@ -115,7 +94,6 @@ public class App{
                 Map<String, MetroStop> stopsById = new java.util.HashMap<>();
                 for (MetroStop ms : metroStops.values()) {
                     System.out.println(ms.getName());
-                    if (ms == null) continue;
                     String idNorm = normalizeId(ms.getId());
                     if (!idNorm.isEmpty()) stopsById.put(idNorm, ms);
 
@@ -311,7 +289,7 @@ public class App{
         System.out.println("DIJKSTRA SHORTEST PATH COMPUTATION");
         System.out.println("=".repeat(60));
 
-        ShortestPathsResult res = Dijkstra.computeShortestPaths(g, source);
+        Dijkstra.ShortestPathsResult res = Dijkstra.computeShortestPaths(g, source);
 
         // distance in meters from source to target
         double meters = res.getDistance(target);
@@ -391,7 +369,7 @@ public class App{
             // Measure computation time
             long startTime = System.nanoTime();
 
-            ShortestPathsResult result = Dijkstra.computeShortestPaths(g, departNode);
+            Dijkstra.ShortestPathsResult result = Dijkstra.computeShortestPaths(g, departNode);
             double distance = result.getDistance(arriveNode);
             List<Node> path = result.reconstructPath(arriveNode);
 

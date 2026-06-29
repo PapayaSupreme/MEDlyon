@@ -20,7 +20,7 @@ import java.util.*;
  * - Construit l'ordre des arrêts par (ligne|sens) depuis horaires_tcl.csv
  * - Propose des suggestions fuzzy pour les noms introuvables et peut ajouter des alias à la volée
  */
-public class AppAlt {
+/*public class AppAlt {
 
     public static void main(String[] args) throws IOException {
         String stationsFile = "raw_datasets/metro/stations-metro-reseau-transports-commun-lyonnais.csv";
@@ -291,4 +291,4 @@ public class AppAlt {
         );
         return String.format("%.1fm (haversine)", meters);
     }
-}
+}*/

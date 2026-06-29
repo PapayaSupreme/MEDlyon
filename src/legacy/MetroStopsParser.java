@@ -17,7 +17,7 @@ import static utilities.Tools.stripQuotes;
  * Simple parser that reads a GTFS `stops.txt` and creates one MetroStop instance per row.
  * It also links each stop to its nearest neighbor (undirected) using a Distance object.
  */
-public class MetroStopsParser {
+/*public class MetroStopsParser {
 
     // Expected number of columns in the GTFS stops.txt used here
     private static final int COL_COUNT = 15;
@@ -88,4 +88,4 @@ public class MetroStopsParser {
 
         return stops;
     }
-}
+}*/
