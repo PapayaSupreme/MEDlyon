@@ -6,8 +6,8 @@ package structure;
 public record Distance(double meters) {
 
 
-    @Override
-    public String toString() {
-        return String.format("%.1fm", meters);
-    }
+	@Override
+	public String toString() {
+		return String.format("%.1fm", meters);
+	}
 }
