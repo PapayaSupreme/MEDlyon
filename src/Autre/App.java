@@ -8,6 +8,7 @@ import utilities.Tools;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.Normalizer;
 import java.util.*;
 
 public class App {
