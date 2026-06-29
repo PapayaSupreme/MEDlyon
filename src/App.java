@@ -21,6 +21,7 @@ import java.io.FileReader;
 
 import Core.Dijkstra;
 import Core.Dijkstra.ShortestPathsResult;
+import Core.CO2;
 
 import static utilities.Tools.haversineMeters;
 
@@ -284,6 +285,7 @@ public class App{
         } else {
             System.out.println("✓ Path found!");
             System.out.println("Distance (m): " + meters);
+            System.out.println("CO2 (g/voyager): " + String.format("%.2f", CO2.computeRouteCO2(path)));
             System.out.println("Number of stops: " + path.size());
             System.out.println("\nItinerary:");
             for (int i = 0; i < path.size(); i++) {
@@ -374,6 +376,7 @@ public class App{
             } else {
                 System.out.println("\n✓ Route found!");
                 System.out.println("Total distance: " + String.format("%.2f", distance) + " meters");
+                System.out.println("CO2: " + String.format("%.2f", CO2.computeRouteCO2(path)) + " g/voyager");
                 System.out.println("Number of stops: " + path.size());
                 System.out.println("\nItinerary:");
 
