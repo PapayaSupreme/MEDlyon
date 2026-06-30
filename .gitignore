@@ -6,3 +6,4 @@ legacy_datasets/
 raw_datasets/bus/lyon_tcl/
 raw_datasets/metro
 raw_datasets/Datasets_download_links.*
+/out-test

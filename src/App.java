@@ -366,16 +366,19 @@ public class App{
                 continue;
             }
 
-            // Measure computation time
-            long startTime = System.nanoTime();
+            long dijkstraStart = System.nanoTime();
+            Dijkstra.ShortestPathsResult dijkstraResult = Dijkstra.computeShortestPaths(g, departNode);
+            double distance = dijkstraResult.getDistance(arriveNode);
+            List<Node> path = dijkstraResult.reconstructPath(arriveNode);
+            long dijkstraDurationNanos = System.nanoTime() - dijkstraStart;
 
-            Dijkstra.ShortestPathsResult result = Dijkstra.computeShortestPaths(g, departNode);
-            double distance = result.getDistance(arriveNode);
-            List<Node> path = result.reconstructPath(arriveNode);
+            long aStarStart = System.nanoTime();
+            AStar.PathResult aStarResult = AStar.computeShortestPath(g, departNode, arriveNode);
+            List<Node> aStarPath = aStarResult.reconstructPath(arriveNode);
+            long aStarDurationNanos = System.nanoTime() - aStarStart;
 
-            long endTime = System.nanoTime();
-            long durationNanos = endTime - startTime;
-            double durationMillis = durationNanos / 1_000_000.0;
+            double dijkstraDurationMillis = dijkstraDurationNanos / 1_000_000.0;
+            double aStarDurationMillis = aStarDurationNanos / 1_000_000.0;
 
             // Display results
             System.out.println("\n" + "-".repeat(60));
@@ -418,7 +421,9 @@ public class App{
                 }
             }
 
-            System.out.println("\nComputation time: " + String.format("%.4f", durationMillis) + " ms (" + durationNanos + " ns)");
+            System.out.println("\nComputation time comparison:");
+            System.out.println("  Dijkstra: " + String.format("%.4f", dijkstraDurationMillis) + " ms (" + dijkstraDurationNanos + " ns)");
+            System.out.println("  A*:       " + String.format("%.4f", aStarDurationMillis) + " ms (" + aStarDurationNanos + " ns)");
             System.out.println("-".repeat(60));
         }
 
