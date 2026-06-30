@@ -1,0 +1,9 @@
+.leaflet-container {
+  height: 100vmin;
+  left:10vi;
+  width: 80vi;
+  /*max-height: 100lvh;
+  max-width: 100lvw;
+  min-height: 100svh;
+  min-width: 100svw;*/
+}

@@ -4,6 +4,7 @@ processed_datasets/
 legacy_datasets/
 raw_datasets/bus/lyon_tcl/
 raw_datasets/metro
+**/.env
 
 #HTML Server : Gitignore
 # Logs

@@ -18,7 +18,13 @@ If you are developing a production application, we recommend using TypeScript wi
 # How to run the vite server :
 
 Go to MEDLYON/Server/roulyon with cd.
-Then run :
+
+Then import the dependencies :
+```sh
+npm i
+```
+
+Finally run the server with :
 ```sh
 npm run dev
 ```
