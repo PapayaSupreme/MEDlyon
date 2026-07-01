@@ -43,12 +43,12 @@ function Map(){
                 </LayersControl.BaseLayer>
                 <LayersControl.Overlay name="Extra information">
                     <LayerGroup>
-
+                        <ShowInfo />{/**A function defined below */}
                     </LayerGroup>
                 </LayersControl.Overlay>
                 <LayersControl.Overlay name="Path (Polylines)" checked>
                     <LayerGroup>
-
+                        <ShowPolylines />{/**A function defined below */}
                     </LayerGroup>
                 </LayersControl.Overlay>
             </LayersControl>
@@ -58,6 +58,15 @@ function Map(){
     </div>
     )
 
+}
+
+function ShowPolylines(){
+    return <></>
+}
+
+function ShowInfo(){
+    {/*getCheckedPathId()*/}
+    return <></>
 }
 
 export default Map
