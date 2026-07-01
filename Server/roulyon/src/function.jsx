@@ -4,40 +4,51 @@
  */
 import {
     getPosition,
-    computePath
+    computePath,
+    getClosestNode
 } from './bridge'
 
-const Nodes=[], Paths=[]
-var failure=false, failuremsg=""
+const Nodes=[], Paths=[{Path:[],Nodes:[]}]
 
-async function ComputeFullPath() {
+async function ComputeFullPath(setfailure) {
     if (Nodes.length<2){
-        failure=true
-        failuremsg="You need at least 2 Nodes, one start and one ending node."
+        setfailure("You need at least 2 Nodes, one start and one ending node.")
+        return;
     }
     let pathId=Paths.length
-    Paths.push([])
+    Paths.push([{Path:[],Nodes:[]}])
     for (let i=0; i<Nodes.length-1 ; i++){
-        Paths[pathId].push(computePath(Nodes[i],Nodes[i+1]))
+        Paths[pathId].Nodes.push(computePath(Nodes[i],Nodes[i+1]))
         //For the time being at a stop there will be duplicate nodes.
     }
-    failure=false
-    
+    setfailure('')
+
+    nodetopath(pathId)
 }
 
-function setNewPos(Location,i){
-    console.log("Was called!")
+async function nodetopath(pathId){
+    for (let i=0; i< Paths[pathId].Nodes.length; i++){
+        Paths[pathId].Path.push([Paths[pathId].Nodes[i],Paths[pathId].Nodes[i]])
+    }
+}
+
+async function setNewPos(Location,i){
     if (i>Node.length-1){
         Nodes.push(getPosition(Location))
     }
     Nodes[i]=getPosition(Location)
 }
 
+function AddNode(position){
+    getClosestNode(position.lat, position.lng).then(Nod =>{
+        if (Nod) Nodes.push(Nod)
+    })
+}
+
 export {
     ComputeFullPath,
-    failure,
-    failuremsg,
     setNewPos,
+    AddNode,
     Nodes,
     Paths,
 }

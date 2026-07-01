@@ -35,7 +35,7 @@ class Node{
  * Additional_Information can contain many things like the distance, the instruction etc...
  */
 async function computePath(sNode, eNode){
-    endpoint="" //unknown
+    let endpoint="" //unknown
     var Path=[]
     await fetch(import.meta.env.Vite_Javalink+endpoint+`?slat=${sNode.lat}&slng=${sNode.lng}&elat=${eNode.lat}&elng=${eNode.lng}`, {
         method:"GET",
@@ -48,6 +48,7 @@ async function computePath(sNode, eNode){
     }).catch(err =>{
         console.warn("There was an error while computing the shortest path.")
         console.error(err)
+        return
     })
 
     return Path
@@ -59,7 +60,7 @@ async function computePath(sNode, eNode){
  * Or it could also be interpreted as an Id if you can use ParseInt on it.
  */ 
 async function getPosition(Location){
-    endpoint="" //unknown
+    let endpoint="" //unknown
     var NodePos
     await fetch(import.meta.env.Vite_Javalink+endpoint+`?Nodename=${Location}`, {
         method:"GET"
@@ -71,6 +72,7 @@ async function getPosition(Location){
     }).catch(err => {
         console.warn("There was an error while trying to retrieve the position of the node you searched for.")
         console.error(err)
+        return 
     })
 
     return NodePos
@@ -84,7 +86,7 @@ async function getPosition(Location){
  * (This is to give a name to markers and make selection of points easier for the user.)
  */
 async function getClosestNode(lat,lng){
-    endpoint="" //unknown
+    let endpoint="" //unknown
     var ClosestNode
     await fetch(import.meta.env.Vite_Javalink+endpoint+`?lat=${lat}&lng=${lng}`, {
         method:"GET"
@@ -95,6 +97,7 @@ async function getClosestNode(lat,lng){
     }).catch(err => {
         console.warn("There was an error while trying to retrieve the name of the node closest to the point you clicked.")
         console.error(err)
+        return 
     })
 
     //To create a polyline between the point and the closest Node! But this happens outside this function.
@@ -109,7 +112,7 @@ export {
 
 /* Template for fetch requests.
 async function computePath(){
-    endpoint="" //unknown
+    let endpoint="" //unknown
     var xxx
     await fetch(import.meta.env.Vite_Javalink+endpoint+`?`, {
         method:"GET"
@@ -117,6 +120,9 @@ async function computePath(){
         return resp.json()
     }).then(data => {
 
+    }).catch(err => {
+        console.warn("error!")
+        console.error(err)
     })
 } 
 */

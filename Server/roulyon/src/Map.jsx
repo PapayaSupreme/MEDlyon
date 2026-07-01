@@ -1,29 +1,22 @@
 import { MapContainer } from 'react-leaflet/MapContainer'
-import { LayersControl, ScaleControl } from 'react-leaflet'
+import { LayersControl, Marker, Polyline, ScaleControl } from 'react-leaflet'
 import { LayerGroup } from 'react-leaflet/LayerGroup'
 import { TileLayer } from 'react-leaflet/TileLayer'
-import { useMap } from 'react-leaflet/hooks'
+import { useMap, useMapEvent } from 'react-leaflet/hooks'
 import "leaflet/dist/leaflet.css"
 import './Map.css'
 import { Control, Layer } from 'leaflet'
+import { Nodes, Paths, AddNode } from './function'
+import { useState } from 'react'
+import  DraggableMarker  from './DraggableMarker'
 
 function Map(){
+    const [pathId, setPathId] = useState(0)
 
     return (
     <div className='leaflet-position'>
-        {/* Initial try
-        <iframe 
-            width="425" 
-            height="350" 
-            src="https://www.openstreetmap.org/export/embed.html?bbox=4.540100097656251%2C45.646208310900626%2C5.247344970703125%2C45.8876184503559&amp;layer=transportmap" >
-        </iframe>
-        <br/>
-        <small>
-            <a href="https://www.openstreetmap.org/?#map=11/45.7670/4.8937&amp;layers=T">View Larger Map</a>
-        </small>*/}
-
         {/** With react-leaflet: */}
-        <MapContainer center={[45.74944,4.83604]} zoom={13}>
+        <MapContainer center={[45.74944,4.83604]} zoom={13} doubleClickZoom={false}>
             <LayersControl position='topright'>
                 <LayersControl.BaseLayer name="Osm default map" checked>
                     <TileLayer
@@ -41,32 +34,69 @@ function Map(){
                         /> 
                     </LayerGroup>
                 </LayersControl.BaseLayer>
-                <LayersControl.Overlay name="Extra information">
+                <LayersControl.Overlay name="Markers (starting and ending nodes)">
                     <LayerGroup>
-                        <ShowInfo />{/**A function defined below */}
+                        <Markers/>{/**A function defined below */}
                     </LayerGroup>
                 </LayersControl.Overlay>
                 <LayersControl.Overlay name="Path (Polylines)" checked>
                     <LayerGroup>
-                        <ShowPolylines />{/**A function defined below */}
+                        <Polyline pathOptions={{color:"red"}} positions={Paths[pathId].Path}></Polyline>
                     </LayerGroup>
                 </LayersControl.Overlay>
             </LayersControl>
             <ScaleControl position='bottomleft' />
-
         </MapContainer>
+        <div className='PathDisplay'>
+            <ol>
+                <ShowPaths setPathId />
+            </ol>
+        </div>
+        {/**The following buttons are developper mode buttons. */}
+        <button onClick={e=>{addPolyline();console.log(Paths[pathId]);setPathId(0)}}>Temp add new line</button>
+        <button onClick={e=>{setPathId(-1)}}>ChangePathId</button>
     </div>
     )
 
 }
-
-function ShowPolylines(){
-    return <></>
+/**
+ * This is only a test function that will be removed when the connection will exist.
+ */
+function addPolyline(){
+    Paths[0].Path.push([45.74944+0.01*Paths[0].length,4.83604+0.01*Paths[0].length])
 }
 
-function ShowInfo(){
-    {/*getCheckedPathId()*/}
-    return <></>
+function Markers(){
+    const map = useMapEvent({
+        dblclick(e){
+            AddNode(e.latlng)
+        }
+    })
+
+    const marker= []
+    for (let i=0 ; i < Nodes.length ; i++){
+        marker.push(<DraggableMarker pos={[Nodes[i].lat,Nodes[i].lng]} name={Nodes[i].name} />)
+    }
+    return marker
+}
+
+function ShowPaths({setPathId}){
+    const itinerary = []
+    for (let i=0 ; i < Paths.length ; i++){
+        itinerary.push(<li key={i}><h2>Path {i}:</h2></li>)
+        if (i ==0 ) itinerary.push(<>(Dev path)</>);
+        itinerary.push(<br />)
+        for (let x=0; x < Paths[i].Nodes.length; x++){
+        itinerary.push(
+            <Itinerary x={x} node={Paths[i].Nodes[x]}></Itinerary>
+            )
+        }
+    }
+    return <ul>{itinerary}</ul>
+}
+
+function Itinerary({node}){
+    return <>{x}. {node.name} {node.Additional_Information ? '' : '('+node.Additional_Information+')'} <br /></>
 }
 
 export default Map

@@ -12,21 +12,28 @@ function EntryInterface() {
   }
 
   function removeinput(){
-    if (inputcount >= Nodes.length) setCount(inputcount-1)
+    if (inputcount>2){
+        if (inputcount == Nodes.length) {
+            if (!confirm("You will be removing the last Node that you created, are you sure?")) return;
+            Nodes.pop()
+        }
+        setCount(inputcount-1)
+    }
   }
 
   return (
-    <form>
-        <Inputs count={inputcount}></Inputs>
-        <button className='addInput' onClick={addinput}>+</button>
-        <button className='removeInput' onClick={removeinput}>-</button>
+    <>
+        <Inputs count={inputcount} setCount={setCount}></Inputs>
+        <button className='addInput' onClick={e => {e.preventDefault();addinput()}}>+</button>
+        <button className='removeInput' onClick={e => {e.preventDefault();removeinput()}}>-</button>
         {/**You can always add more input but you can only remove one if there is no Node. */}
-    </form>
+    </>
   )
 }
 
-function Inputs({ count }){
+function Inputs({ count , setCount}){
     const Ipts= []
+    if (count < Nodes.length) setCount(Nodes.length);
     for (let i = 1; i <= count ; i++) {
         if (i < Nodes.length){
             Ipts.push(singularInput(Nodes[i].name));
@@ -34,14 +41,14 @@ function Inputs({ count }){
             Ipts.push(singularInput(null))
         }
     }
-    return Ipts;
+    return <label>{Ipts}</label>;
 }
 
 function singularInput(name, i){
     if (name){
-        return <input type='text' onBlur={e => {if(e.target.value!=name) {setNewPos(e.target.value,i)}}}>{name}</input>
+        return <label htmlFor={i}><input type='text' id={i} onBlur={e => {if(e.target.value!=name) {setNewPos(e.target.value,i)}}}>{name}</input></label>
     } else {
-        return <input type='text' onBlur={e => {if(e.target.value!='') {setNewPos(e.target.value,i)}}}></input>
+        return <label htmlFor={i}><input type='text' id={i} onBlur={e => {if(e.target.value!='') {setNewPos(e.target.value,i)}}}></input></label>
     }
 }
 
