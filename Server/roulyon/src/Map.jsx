@@ -1,11 +1,10 @@
 import { MapContainer } from 'react-leaflet/MapContainer'
-import { LayersControl, Marker, Polyline, ScaleControl } from 'react-leaflet'
+import { LayersControl, Polyline, ScaleControl } from 'react-leaflet'
 import { LayerGroup } from 'react-leaflet/LayerGroup'
 import { TileLayer } from 'react-leaflet/TileLayer'
-import { useMap, useMapEvent } from 'react-leaflet/hooks'
+import { useMapEvent } from 'react-leaflet/hooks'
 import "leaflet/dist/leaflet.css"
 import './Map.css'
-import { Control, Layer } from 'leaflet'
 import { Nodes, Paths, AddNode } from './function'
 import { useState } from 'react'
 import  DraggableMarker  from './DraggableMarker'
@@ -80,8 +79,8 @@ function Map(){
             </ol>
         </div>
         {/**The following buttons are developper mode buttons. */}
-        <button onClick={e=>{addPolyline();console.log(Paths[pathId]);setPathId(0)}}>Temp add new line</button>
-        <button onClick={e=>{setPathId(-1)}}>ChangePathId</button>
+        <button onClick={_=>{addPolyline();console.log(Paths[pathId]);setPathId(0)}}>Temp add new line</button>
+        <button onClick={_=>{setPathId(-1)}}>ChangePathId</button>
     </div>
     )
 
@@ -110,19 +109,19 @@ function Markers(){
 function ShowPaths({setPathId}){
     const itinerary = []
     for (let i=0 ; i < Paths.length ; i++){
-        itinerary.push(<li key={i}><h2>Path {i}:</h2></li>)
+        itinerary.push(<li onClick={_=>{setPathId(i)}}><h2>Path {i}:</h2></li>)
         if (i ==0 ) itinerary.push(<>(Dev path)</>);
         itinerary.push(<br />)
         for (let x=0; x < Paths[i].Nodes.length; x++){
-        itinerary.push(
-            <Itinerary x={x} node={Paths[i].Nodes[x]}></Itinerary>
-            )
+            itinerary.push(
+                <Itinerary x={x} node={Paths[i].Nodes[x]}></Itinerary>
+                )
         }
     }
     return <ul>{itinerary}</ul>
 }
 
-function Itinerary({node}){
+function Itinerary({ x, node}){
     return <>{x}. {node.name} {node.Additional_Information ? '' : '('+node.Additional_Information+')'} <br /></>
 }
 

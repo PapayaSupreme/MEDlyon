@@ -42,7 +42,7 @@ async function computePath(sNode, eNode){
     }).then(resp => {
         return resp.json()
     }).then(data => {
-        for (item in data.Path){
+        for (let item in data.Path){
             Path.push(new Node(item.lat,item.lng,item.name,item.Additional_Information))
         }
     }).catch(err =>{

@@ -2,7 +2,6 @@ import { ComputeFullPath } from './function'
 import EntryInterface from './EntryInterface'
 import Failure from './Failure'
 import './App.css'
-import ErrorBoundary from './ErrorBoundary'
 import { useState } from 'react'
 
 function App() {
@@ -11,9 +10,7 @@ function App() {
   return (
     <>
       <form>
-        <ErrorBoundary fallback={<p>There was an error</p>}>
-          <EntryInterface />
-        </ErrorBoundary>
+        <EntryInterface />
         <span className='border'></span>
         <br />
         <button onClick={e=> {e.preventDefault();ComputeFullPath(setfailure)}}>Find the path</button>
