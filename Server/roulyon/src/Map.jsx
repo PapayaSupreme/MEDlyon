@@ -25,11 +25,38 @@ function Map(){
                         minZoom={11}
                     />
                 </LayersControl.BaseLayer>
-                <LayersControl.BaseLayer name="Thunderforest map (Uses APIkey)" disabled>
+                <LayersControl.BaseLayer name="Transport - Thunderforest (Uses APIkey)">
+                    <LayerGroup>
+                        <TileLayer 
+                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors,  Tiles courtesy of<a href="https://www.thunderforest.com/"> Andy Allan.</a> (<a href="https://www.thunderforest.com/" target="_blank">&copy; Thunderforest</a>)'    
+                            url={"https://api.thunderforest.com/transport/{z}/{x}/{y}{r}.png?apikey="+import.meta.env.VITE_THUNDERFOREST_APIKEY}
+                            minZoom={11}
+                        /> 
+                    </LayerGroup>
+                </LayersControl.BaseLayer>
+                <LayersControl.BaseLayer name="Transport dark - Thunderforest (Uses APIkey)">
                     <LayerGroup>
                         <TileLayer 
                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors,  Tiles courtesy of<a href="https://www.thunderforest.com/"> Andy Allan.</a> (<a href="https://www.thunderforest.com/" target="_blank">&copy; Thunderforest</a>)'    
                             url={"https://api.thunderforest.com/transport-dark/{z}/{x}/{y}{r}.png?apikey="+import.meta.env.VITE_THUNDERFOREST_APIKEY}
+                            minZoom={11}
+                        /> 
+                    </LayerGroup>
+                </LayersControl.BaseLayer>
+                <LayersControl.BaseLayer name="Atlas - Thunderforest (Uses APIkey)">
+                    <LayerGroup>
+                        <TileLayer 
+                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors,  Tiles courtesy of<a href="https://www.thunderforest.com/"> Andy Allan.</a> (<a href="https://www.thunderforest.com/" target="_blank">&copy; Thunderforest</a>)'    
+                            url={"https://api.thunderforest.com/mobile-atlas/{z}/{x}/{y}{r}.png?apikey="+import.meta.env.VITE_THUNDERFOREST_APIKEY}
+                            minZoom={11}
+                        /> 
+                    </LayerGroup>
+                </LayersControl.BaseLayer>
+                <LayersControl.BaseLayer name="Neighbourhood - Thunderforest (Uses APIkey)">
+                    <LayerGroup>
+                        <TileLayer 
+                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors,  Tiles courtesy of<a href="https://www.thunderforest.com/"> Andy Allan.</a> (<a href="https://www.thunderforest.com/" target="_blank">&copy; Thunderforest</a>)'    
+                            url={"https://api.thunderforest.com/neighbourhood/{z}/{x}/{y}{r}.png?apikey="+import.meta.env.VITE_THUNDERFOREST_APIKEY}
                             minZoom={11}
                         /> 
                     </LayerGroup>
