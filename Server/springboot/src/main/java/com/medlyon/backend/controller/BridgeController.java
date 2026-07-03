@@ -2,6 +2,7 @@ package com.medlyon.backend.controller;
 
 import com.medlyon.backend.model.PathResponse;
 import com.medlyon.backend.model.PointResponse;
+import com.medlyon.backend.model.RouteComparisonResponse;
 import com.medlyon.backend.model.StopSummary;
 import com.medlyon.backend.service.TransitService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,5 +44,14 @@ public class BridgeController {
 			@RequestParam double elat,
 			@RequestParam double elng) {
 		return transitService.computePath(slat, slng, elat, elng);
+	}
+
+	@GetMapping("/compare-path")
+	public RouteComparisonResponse comparePath(
+			@RequestParam double slat,
+			@RequestParam double slng,
+			@RequestParam double elat,
+			@RequestParam double elng) {
+		return transitService.compareAlgorithms(slat, slng, elat, elng);
 	}
 }

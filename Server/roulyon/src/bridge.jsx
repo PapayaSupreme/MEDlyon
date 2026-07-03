@@ -53,6 +53,37 @@ async function computePath(sNode, eNode) {
     ))
 }
 
+async function comparePathAlgorithms(sNode, eNode) {
+    const data = await requestJson(
+        `/compare-path?slat=${encodeURIComponent(sNode.lat)}&slng=${encodeURIComponent(sNode.lng)}&elat=${encodeURIComponent(eNode.lat)}&elng=${encodeURIComponent(eNode.lng)}`,
+        'There was an error while comparing Dijkstra and A*.'
+    )
+
+    if (!data) {
+        return {
+            dijkstra: [],
+            aStar: [],
+            dijkstraTimeNanos: 0,
+            aStarTimeNanos: 0,
+        }
+    }
+
+    const mapPath = (path) => (path?.Path ?? []).map(item => new TransitStop(
+        parseStopId(item.Additional_Information),
+        item.lat,
+        item.lng,
+        item.name,
+        item.Additional_Information ?? []
+    ))
+
+    return {
+        dijkstra: mapPath(data.dijkstra),
+        aStar: mapPath(data.aStar),
+        dijkstraTimeNanos: data.dijkstraTimeNanos ?? 0,
+        aStarTimeNanos: data.aStarTimeNanos ?? 0,
+    }
+}
+
 async function getPosition(location) {
     const data = await requestJson(`/position?Nodename=${encodeURIComponent(location)}`, 'There was an error while retrieving a stop position.')
     if (!data) return undefined
@@ -70,5 +101,6 @@ export {
     getClosestNode,
     getPosition,
     getStops,
-    computePath
+    computePath,
+    comparePathAlgorithms
 }

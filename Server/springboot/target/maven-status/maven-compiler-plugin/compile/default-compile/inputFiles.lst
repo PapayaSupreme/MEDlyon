@@ -3,6 +3,7 @@ C:\Users\pablo\Desktop\repos\MEDlyon\Server\springboot\src\main\java\com\medlyon
 C:\Users\pablo\Desktop\repos\MEDlyon\Server\springboot\src\main\java\com\medlyon\backend\MedlyonBackendApplication.java
 C:\Users\pablo\Desktop\repos\MEDlyon\Server\springboot\src\main\java\com\medlyon\backend\model\PathResponse.java
 C:\Users\pablo\Desktop\repos\MEDlyon\Server\springboot\src\main\java\com\medlyon\backend\model\PointResponse.java
+C:\Users\pablo\Desktop\repos\MEDlyon\Server\springboot\src\main\java\com\medlyon\backend\model\RouteComparisonResponse.java
 C:\Users\pablo\Desktop\repos\MEDlyon\Server\springboot\src\main\java\com\medlyon\backend\model\StopSummary.java
 C:\Users\pablo\Desktop\repos\MEDlyon\Server\springboot\src\main\java\com\medlyon\backend\model\TransitNode.java
 C:\Users\pablo\Desktop\repos\MEDlyon\Server\springboot\src\main\java\com\medlyon\backend\service\TransitService.java

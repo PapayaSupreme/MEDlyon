@@ -102,6 +102,26 @@
   min-width: 0;
 }
 
+.timing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.timing-grid div {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  background: var(--panel-strong);
+  min-width: 0;
+}
+
+.timing-grid strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-h);
+}
+
 .selection-summary strong,
 .stop-row strong,
 .itinerary-list strong {
@@ -198,6 +218,10 @@
   }
 
   .selection-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .timing-grid {
     grid-template-columns: 1fr;
   }
 

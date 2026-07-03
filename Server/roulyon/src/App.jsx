@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import TransitMap from './Map'
-import { computePath, getStops } from './bridge'
+import { comparePathAlgorithms, getStops } from './bridge'
 import './App.css'
 
 function App() {
@@ -11,6 +11,8 @@ function App() {
   const [departure, setDeparture] = useState(null)
   const [arrival, setArrival] = useState(null)
   const [itinerary, setItinerary] = useState([])
+  const [aStarItinerary, setAStarItinerary] = useState([])
+  const [timings, setTimings] = useState({ dijkstra: 0, aStar: 0 })
   const [status, setStatus] = useState('')
   const [computing, setComputing] = useState(false)
 
@@ -79,19 +81,25 @@ function App() {
 
     setComputing(true)
     setStatus('Computing itinerary...')
-    const path = await computePath(departure, arrival)
-    setItinerary(path)
+    const comparison = await comparePathAlgorithms(departure, arrival)
+    setItinerary(comparison.dijkstra)
+    setAStarItinerary(comparison.aStar)
+    setTimings({
+      dijkstra: comparison.dijkstraTimeNanos,
+      aStar: comparison.aStarTimeNanos,
+    })
     setComputing(false)
 
-    if (!path.length) {
+    if (!comparison.dijkstra.length && !comparison.aStar.length) {
       setStatus('No itinerary was returned by the backend.')
       return
     }
 
-    setStatus(`Itinerary found with ${path.length} stop${path.length > 1 ? 's' : ''}.`)
+    setStatus(`Itinerary found with ${comparison.dijkstra.length} stop${comparison.dijkstra.length > 1 ? 's' : ''}.`)
   }
 
   const pathCoordinates = itinerary.map(stop => [stop.lat, stop.lng])
+  const formatMs = nanos => `${(nanos / 1_000_000).toFixed(3)} ms`
 
   return (
     <div className="app-shell">
@@ -182,6 +190,28 @@ function App() {
               </li>
             ))}
           </ol>
+        </div>
+
+        <div className="panel">
+          <div className="results-header">
+            <h2>Compute time</h2>
+            <span>Backend timing</span>
+          </div>
+
+          <div className="timing-grid">
+            <div>
+              <span>Dijkstra</span>
+              <strong>{timings.dijkstra ? formatMs(timings.dijkstra) : '---'}</strong>
+            </div>
+            <div>
+              <span>A*</span>
+              <strong>{timings.aStar ? formatMs(timings.aStar) : '---'}</strong>
+            </div>
+            <div>
+              <span>Stops</span>
+              <strong>{aStarItinerary.length || itinerary.length || 0}</strong>
+            </div>
+          </div>
         </div>
       </aside>
 

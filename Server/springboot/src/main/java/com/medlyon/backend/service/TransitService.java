@@ -2,6 +2,7 @@ package com.medlyon.backend.service;
 
 import com.medlyon.backend.model.PathResponse;
 import com.medlyon.backend.model.PointResponse;
+import com.medlyon.backend.model.RouteComparisonResponse;
 import com.medlyon.backend.model.StopSummary;
 import com.medlyon.backend.model.TransitNode;
 import jakarta.annotation.PostConstruct;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.PriorityQueue;
 import java.util.Set;
 
 @Service
@@ -83,9 +85,38 @@ public class TransitService {
 	public PathResponse computePath(double slat, double slng, double elat, double elng) {
 		TransitNode start = nearestNode(slat, slng);
 		TransitNode end = nearestNode(elat, elng);
+		return new PathResponse(computeShortestPath(start, end));
+	}
 
+	public RouteComparisonResponse compareAlgorithms(double slat, double slng, double elat, double elng) {
+		TransitNode start = nearestNode(slat, slng);
+		TransitNode end = nearestNode(elat, elng);
+
+		long dijkstraStart = System.nanoTime();
+		List<PointResponse> dijkstraPath = computeShortestPath(start, end);
+		long dijkstraTime = System.nanoTime() - dijkstraStart;
+
+		long aStarStart = System.nanoTime();
+		List<PointResponse> aStarPath = computeAStarPath(start, end);
+		long aStarTime = System.nanoTime() - aStarStart;
+
+		return new RouteComparisonResponse(
+				new PathResponse(dijkstraPath),
+				new PathResponse(aStarPath),
+				dijkstraTime,
+				aStarTime
+		);
+	}
+
+	private TransitNode nearestNode(double lat, double lng) {
+		return nodesById.values().stream()
+				.min(Comparator.comparingDouble(node -> haversineMeters(lat, lng, node.lat(), node.lng())))
+				.orElseThrow(() -> new IllegalStateException("No transit nodes loaded"));
+	}
+
+	private List<PointResponse> computeShortestPath(TransitNode start, TransitNode end) {
 		if (start.id().equals(end.id())) {
-			return new PathResponse(List.of(start.toResponse()));
+			return List.of(start.toResponse());
 		}
 
 		Map<String, Double> distance = new HashMap<>();
@@ -124,27 +155,86 @@ public class TransitService {
 			}
 		}
 
+		return reconstructPath(start, end, previous);
+	}
+
+	private List<PointResponse> computeAStarPath(TransitNode start, TransitNode end) {
+		if (start.id().equals(end.id())) {
+			return List.of(start.toResponse());
+		}
+
+		Map<String, Double> gScore = new HashMap<>();
+		Map<String, Double> fScore = new HashMap<>();
+		Map<String, String> previous = new HashMap<>();
+		Set<String> closed = new HashSet<>();
+
+		for (String id : nodesById.keySet()) {
+			gScore.put(id, Double.POSITIVE_INFINITY);
+			fScore.put(id, Double.POSITIVE_INFINITY);
+		}
+		gScore.put(start.id(), 0.0);
+		fScore.put(start.id(), haversineMeters(start.lat(), start.lng(), end.lat(), end.lng()));
+
+		PriorityQueue<String> open = new PriorityQueue<>(Comparator.comparingDouble(fScore::get));
+		open.add(start.id());
+
+		while (!open.isEmpty()) {
+			String currentId = open.poll();
+			if (closed.contains(currentId)) {
+				continue;
+			}
+			if (currentId.equals(end.id())) {
+				break;
+			}
+			closed.add(currentId);
+
+			TransitNode current = nodesById.get(currentId);
+			if (current == null) {
+				continue;
+			}
+
+			for (Map.Entry<String, Double> link : current.links().entrySet()) {
+				String neighborId = link.getKey();
+				TransitNode neighbor = nodesById.get(neighborId);
+				if (neighbor == null || closed.contains(neighborId)) {
+					continue;
+				}
+
+				double tentativeG = gScore.getOrDefault(currentId, Double.POSITIVE_INFINITY) + link.getValue();
+				if (tentativeG < gScore.getOrDefault(neighborId, Double.POSITIVE_INFINITY)) {
+					previous.put(neighborId, currentId);
+					gScore.put(neighborId, tentativeG);
+					double estimated = tentativeG + haversineMeters(neighbor.lat(), neighbor.lng(), end.lat(), end.lng());
+					fScore.put(neighborId, estimated);
+					open.remove(neighborId);
+					open.add(neighborId);
+				}
+			}
+		}
+
+		return reconstructPath(start, end, previous);
+	}
+
+	private List<PointResponse> reconstructPath(TransitNode start, TransitNode end, Map<String, String> previous) {
 		Deque<PointResponse> result = new ArrayDeque<>();
 		String cursor = end.id();
 		if (!previous.containsKey(cursor) && !cursor.equals(start.id())) {
-			return new PathResponse(List.of(start.toResponse(), end.toResponse()));
+			return List.of(start.toResponse(), end.toResponse());
 		}
 
 		result.addFirst(end.toResponse());
 		while (previous.containsKey(cursor)) {
 			cursor = previous.get(cursor);
-			result.addFirst(nodesById.get(cursor).toResponse());
+			TransitNode node = nodesById.get(cursor);
+			if (node == null) {
+				break;
+			}
+			result.addFirst(node.toResponse());
 		}
 		if (!result.isEmpty() && !result.peekFirst().name().equals(start.name())) {
 			result.addFirst(start.toResponse());
 		}
-		return new PathResponse(new ArrayList<>(result));
-	}
-
-	private TransitNode nearestNode(double lat, double lng) {
-		return nodesById.values().stream()
-				.min(Comparator.comparingDouble(node -> haversineMeters(lat, lng, node.lat(), node.lng())))
-				.orElseThrow(() -> new IllegalStateException("No transit nodes loaded"));
+		return new ArrayList<>(result);
 	}
 
 	private void loadStops(Path stopsPath) throws IOException {
