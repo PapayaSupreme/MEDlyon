@@ -19,3 +19,23 @@
   padding: 6px 8px;
   cursor: pointer;
 }
+:root {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+    --text: #475569;
+    --text-h: #0f172a;
+    --bg: red;
+    --panel: #ffffff;
+    --panel-strong: #eef2f7;
+    --border: #d7dde5;
+    --accent: #2563eb;
+    --accent-bg: rgba(37, 99, 235, 0.1);
+    --accent-border: rgba(37, 99, 235, 0.35);
+    color: var(--text);
+    background: var(--bg);
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}s
