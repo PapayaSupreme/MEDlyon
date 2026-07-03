@@ -1,128 +1,74 @@
-/**
- * This file contains the functions that will bridge between the java backend and this Node server. 
- * DO NOT USE THIS FILE AS A REACT COMPONENT
- */
-
-/**
- * A simple class to represent the points on the map.
- * It contains latitude and longitude
- * And may have a name.
- */
-class Node{
-    constructor(lat,lng,name,Additional_Information){
-        this.lat=lat;
-        this.lng=lng;
-        this.name=name;//May not be set
-        this.Info=Additional_Information;//May not be set
+class TransitStop {
+    constructor(id, lat, lng, name, additionalInformation = []) {
+        this.id = id
+        this.lat = lat
+        this.lng = lng
+        this.name = name
+        this.Additional_Information = additionalInformation
     }
 }
 
-/**
- * This functions takes in two Nodes, a Starting node (s) and an Ending Node (e)
- * It will contact the java backend to compute the path between these two Nodes.
- * The response will be structured the following way :
- * 
- * {
- *  Path:[
- *      sNode,
- *      ...,
- *      eNode
- *      ]
- * }
- * 
- * With information inside the Nodes : { lat:xxx , lng:xxx , name:xxx , Additional_Information : [ xxx ] }
- * 
- * Additional_Information can contain many things like the distance, the instruction etc...
- */
-async function computePath(sNode, eNode){
-    let endpoint="" //unknown
-    var Path=[]
-    await fetch(import.meta.env.Vite_Javalink+endpoint+`?slat=${sNode.lat}&slng=${sNode.lng}&elat=${eNode.lat}&elng=${eNode.lng}`, {
-        method:"GET",
-    }).then(resp => {
-        return resp.json()
-    }).then(data => {
-        for (let item in data.Path){
-            Path.push(new Node(item.lat,item.lng,item.name,item.Additional_Information))
-        }
-    }).catch(err =>{
-        console.warn("There was an error while computing the shortest path.")
-        console.error(err)
-        return
-    })
+const baseUrl = import.meta.env.VITE_JAVA_LINK ?? 'http://localhost:8080/api'
 
-    return Path
+function parseStopId(additionalInformation) {
+    if (!Array.isArray(additionalInformation)) return ''
+    const match = additionalInformation.find(item => typeof item === 'string' && item.startsWith('stop_id='))
+    return match ? match.slice('stop_id='.length) : ''
 }
 
-/**
- * This function takes in one string, Location
- * It represents the Location of the Node that the user type inside the input.
- * Or it could also be interpreted as an Id if you can use ParseInt on it.
- */ 
-async function getPosition(Location){
-    let endpoint="" //unknown
-    var NodePos
-    await fetch(import.meta.env.Vite_Javalink+endpoint+`?Nodename=${Location}`, {
-        method:"GET"
-    }).then(resp => {
-        return resp.json()
-    }).then(data => {
-        NodePos = new Node(data.lat,data.lng,data.name)
-        //We rename the Node to autocorrect to the right writing if there are some differences.
+async function requestJson(path, failureLabel) {
+    const response = await fetch(`${baseUrl}${path}`, {
+        method: 'GET',
     }).catch(err => {
-        console.warn("There was an error while trying to retrieve the position of the node you searched for.")
+        console.warn(failureLabel)
         console.error(err)
-        return 
+        return null
     })
 
-    return NodePos
-} 
+    if (!response || !response.ok) return undefined
+    return response.json()
+}
 
-/**
- * This function takes in two integers, latitude and longitude.
- * It calls the Java backend and returns a string in the parameter name.
- * And the actual position of the Node with parameters lat and lng.
- * This string represents the name of the node closest to the provided latitude and longitude.
- * (This is to give a name to markers and make selection of points easier for the user.)
- */
-async function getClosestNode(lat,lng){
-    let endpoint="" //unknown
-    var ClosestNode
-    await fetch(import.meta.env.Vite_Javalink+endpoint+`?lat=${lat}&lng=${lng}`, {
-        method:"GET"
-    }).then(resp => {
-        return resp.json()
-    }).then(data => {
-        ClosestNode = new Node(data.lat,data.lng,data.name)
-    }).catch(err => {
-        console.warn("There was an error while trying to retrieve the name of the node closest to the point you clicked.")
-        console.error(err)
-        return 
-    })
+async function getStops() {
+    const data = await requestJson('/stops', 'There was an error while loading the stop list.')
+    return Array.isArray(data)
+        ? data.map(item => new TransitStop(item.id, item.lat, item.lng, item.name, item.Additional_Information ?? []))
+        : []
+}
 
-    //To create a polyline between the point and the closest Node! But this happens outside this function.
-    return ClosestNode 
+async function computePath(sNode, eNode) {
+    const data = await requestJson(
+        `/path?slat=${encodeURIComponent(sNode.lat)}&slng=${encodeURIComponent(sNode.lng)}&elat=${encodeURIComponent(eNode.lat)}&elng=${encodeURIComponent(eNode.lng)}`,
+        'There was an error while computing the shortest path.'
+    )
+
+    if (!data || !Array.isArray(data.Path)) return []
+
+    return data.Path.map(item => new TransitStop(
+        parseStopId(item.Additional_Information),
+        item.lat,
+        item.lng,
+        item.name,
+        item.Additional_Information ?? []
+    ))
+}
+
+async function getPosition(location) {
+    const data = await requestJson(`/position?Nodename=${encodeURIComponent(location)}`, 'There was an error while retrieving a stop position.')
+    if (!data) return undefined
+    return new TransitStop(parseStopId(data.Additional_Information), data.lat, data.lng, data.name, data.Additional_Information ?? [])
+}
+
+async function getClosestNode(lat, lng) {
+    const data = await requestJson(`/closest-node?lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}`, 'There was an error while retrieving the closest stop.')
+    if (!data) return undefined
+    return new TransitStop(parseStopId(data.Additional_Information), data.lat, data.lng, data.name, data.Additional_Information ?? [])
 }
 
 export {
+    TransitStop,
     getClosestNode,
     getPosition,
+    getStops,
     computePath
 }
-
-/* Template for fetch requests.
-async function computePath(){
-    let endpoint="" //unknown
-    var xxx
-    await fetch(import.meta.env.Vite_Javalink+endpoint+`?`, {
-        method:"GET"
-    }).then(resp => {
-        return resp.json()
-    }).then(data => {
-
-    }).catch(err => {
-        console.warn("error!")
-        console.error(err)
-    })
-} 
-*/

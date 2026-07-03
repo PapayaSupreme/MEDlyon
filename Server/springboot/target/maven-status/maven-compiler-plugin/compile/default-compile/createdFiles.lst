@@ -1,0 +1,10 @@
+com\medlyon\backend\model\TransitNode.class
+com\medlyon\backend\MedlyonBackendApplication.class
+com\medlyon\backend\service\TransitService$CsvColumns.class
+com\medlyon\backend\model\PointResponse.class
+com\medlyon\backend\config\CorsConfig.class
+com\medlyon\backend\service\TransitService$TripStop.class
+com\medlyon\backend\controller\BridgeController.class
+com\medlyon\backend\model\PathResponse.class
+com\medlyon\backend\model\StopSummary.class
+com\medlyon\backend\service\TransitService.class

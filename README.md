@@ -1,4 +1,4 @@
-Requirements: Java SDK 26.0.1+
+Requirements: Java SDK 21+
 
 Entry point : [./src/App.java](/src/App.java)
 
@@ -27,6 +27,15 @@ We Use the following data sets:
 
 `App` : Entrypoint
 
+# Launch GUI :
+
+1. Create `Server/roulyon/.env`. 
+
+2. Start the Spring Boot backend from `Server/springboot` :
+   mvn spring-boot:run
+
+3. Start the React app from `Server/roulyon` :
+   npm run dev
 
 # Contributors :
 

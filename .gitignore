@@ -31,3 +31,4 @@ Server/roulyon/*.ntvs*
 Server/roulyon/*.njsproj
 Server/roulyon/*.sln
 Server/roulyon/*.sw?
+/out-test

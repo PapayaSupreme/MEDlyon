@@ -1,16 +1,4 @@
-import parsers.MetroParser;
-import structure.Metro;
-import structure.MetroStop;
-import structure.Node;
-import structure.Distance;
-import utilities.Tools;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.*;
-
-public class App {
+/*public class App {
 
     public static void main(String[] args) throws IOException {
         String stationsFile = "processed_datasets/stations-metro-reseau-transports-commun-lyonnais.csv";
@@ -137,4 +125,4 @@ public class App {
         );
         return String.format("%.1fm (haversine)", meters);
     }
-}
+}*/

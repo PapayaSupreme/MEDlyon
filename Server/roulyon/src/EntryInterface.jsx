@@ -34,22 +34,32 @@ function EntryInterface() {
 function Inputs({ count , setCount}){
     const Ipts= []
     if (count < Nodes.length) setCount(Nodes.length);
-    for (let i = 1; i <= count ; i++) {
+    for (let i = 0; i < count ; i++) {
         if (i < Nodes.length){
-            Ipts.push(singularInput(Nodes[i].name));
+            Ipts.push(singularInput(Nodes[i].name, i));
         } else {
-            Ipts.push(singularInput(null))
+            Ipts.push(singularInput('', i))
         }
     }
-    return <label>{Ipts}</label>;
+    return <div>{Ipts}</div>;
 }
 
 function singularInput(name, i){
-    if (name){
-        return <label htmlFor={i}><input type='text' id={i} onBlur={e => {if(e.target.value!=name) {setNewPos(e.target.value,i)}}}>{name}</input></label>
-    } else {
-        return <label htmlFor={i}><input type='text' id={i} onBlur={e => {if(e.target.value!='') {setNewPos(e.target.value,i)}}}></input></label>
-    }
+    return (
+        <label htmlFor={`node-${i}`}>
+            <input
+                type='text'
+                id={`node-${i}`}
+                defaultValue={name}
+                onBlur={e => {
+                    const value = e.target.value.trim()
+                    if (value !== '' && value !== name) {
+                        setNewPos(value, i)
+                    }
+                }}
+            />
+        </label>
+    )
 }
 
 export default EntryInterface 
