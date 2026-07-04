@@ -1,0 +1,232 @@
+.app-shell {
+  display: grid;
+  grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-right: 1px solid var(--border);
+  background: var(--bg);
+  min-height: 0;
+}
+
+.panel {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  background: var(--panel);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.panel-header h1 {
+  font-size: 28px;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.panel-header p {
+  margin-top: 6px;
+  color: var(--text);
+}
+
+.toggle-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.toggle,
+.compute-button,
+.stop-row,
+.popup-actions button {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-strong);
+  color: var(--text-h);
+  font: inherit;
+}
+
+.toggle,
+.compute-button {
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.toggle.active {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.search-field {
+  display: grid;
+  gap: 6px;
+}
+
+.search-field span,
+.results-header span,
+.selection-summary span,
+.stop-row span,
+.itinerary-list span,
+.popup-meta,
+.status-line {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.search-field input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.selection-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.selection-summary div {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  background: var(--panel-strong);
+  min-width: 0;
+}
+
+.timing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.timing-grid div {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  background: var(--panel-strong);
+  min-width: 0;
+}
+
+.timing-grid strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-h);
+}
+
+.selection-summary strong,
+.stop-row strong,
+.itinerary-list strong {
+  display: block;
+  color: var(--text-h);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.compute-button {
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
+}
+
+.compute-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.status-line {
+  min-height: 1.5em;
+  margin: 0;
+}
+
+.results-panel {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.results-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.results-header h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.stop-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: auto;
+  min-height: 180px;
+  max-height: 42vh;
+}
+
+.stop-row {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.stop-row:hover,
+.toggle:hover,
+.compute-button:hover,
+.popup-actions button:hover {
+  border-color: var(--accent-border);
+}
+
+.itinerary-list {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 8px;
+  max-height: 28vh;
+  overflow: auto;
+}
+
+.itinerary-list li {
+  min-width: 0;
+}
+
+.map-shell {
+  min-width: 0;
+  min-height: 0;
+  min-height: 100vh;
+}
+
+@media (max-width: 900px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .selection-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .timing-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stop-list,
+  .itinerary-list {
+    max-height: none;
+  }
+}
