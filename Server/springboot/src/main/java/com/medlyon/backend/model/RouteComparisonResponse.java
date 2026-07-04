@@ -6,6 +6,8 @@ public record RouteComparisonResponse(
 		@JsonProperty("dijkstra") PathResponse dijkstra,
 		@JsonProperty("aStar") PathResponse aStar,
 		@JsonProperty("dijkstraTimeNanos") long dijkstraTimeNanos,
-		@JsonProperty("aStarTimeNanos") long aStarTimeNanos
+		@JsonProperty("aStarTimeNanos") long aStarTimeNanos,
+		@JsonProperty("dijkstraCo2Grams") double dijkstraCo2Grams,
+		@JsonProperty("aStarCo2Grams") double aStarCo2Grams
 ) {
 }

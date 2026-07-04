@@ -1,6 +1,6 @@
-package utilities;
+package com.medlyon.backend.core.utilities;
 
-import structure.Node;
+import com.medlyon.backend.core.structure.Node;
 
 import java.util.Objects;
 

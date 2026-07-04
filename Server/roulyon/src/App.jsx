@@ -13,6 +13,7 @@ function App() {
   const [itinerary, setItinerary] = useState([])
   const [aStarItinerary, setAStarItinerary] = useState([])
   const [timings, setTimings] = useState({ dijkstra: 0, aStar: 0 })
+  const [co2, setCo2] = useState({ dijkstra: 0, aStar: 0 })
   const [status, setStatus] = useState('')
   const [computing, setComputing] = useState(false)
 
@@ -88,6 +89,10 @@ function App() {
       dijkstra: comparison.dijkstraTimeNanos,
       aStar: comparison.aStarTimeNanos,
     })
+    setCo2({
+      dijkstra: comparison.dijkstraCo2Grams,
+      aStar: comparison.aStarCo2Grams,
+    })
     setComputing(false)
 
     if (!comparison.dijkstra.length && !comparison.aStar.length) {
@@ -100,6 +105,7 @@ function App() {
 
   const pathCoordinates = itinerary.map(stop => [stop.lat, stop.lng])
   const formatMs = nanos => `${(nanos / 1_000_000).toFixed(3)} ms`
+  const formatCo2 = grams => `${grams.toFixed(1)} g`
 
   return (
     <div className="app-shell">
@@ -194,18 +200,20 @@ function App() {
 
         <div className="panel">
           <div className="results-header">
-            <h2>Compute time</h2>
-            <span>Backend timing</span>
+            <h2>Metrics</h2>
+            <span>Backend timing and CO2</span>
           </div>
 
           <div className="timing-grid">
             <div>
               <span>Dijkstra</span>
               <strong>{timings.dijkstra ? formatMs(timings.dijkstra) : '---'}</strong>
+              <small>{formatCo2(co2.dijkstra)}</small>
             </div>
             <div>
               <span>A*</span>
               <strong>{timings.aStar ? formatMs(timings.aStar) : '---'}</strong>
+              <small>{formatCo2(co2.aStar)}</small>
             </div>
             <div>
               <span>Stops</span>

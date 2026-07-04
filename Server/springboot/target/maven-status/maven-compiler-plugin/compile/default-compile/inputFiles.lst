@@ -3,16 +3,13 @@ C:\Users\pablo\Desktop\repos\MEDlyon\Server\springboot\src\main\java\com\medlyon
 C:\Users\pablo\Desktop\repos\MEDlyon\Server\springboot\src\main\java\com\medlyon\backend\core\algorithm\AStar.java
 C:\Users\pablo\Desktop\repos\MEDlyon\Server\springboot\src\main\java\com\medlyon\backend\core\algorithm\CO2.java
 C:\Users\pablo\Desktop\repos\MEDlyon\Server\springboot\src\main\java\com\medlyon\backend\core\algorithm\Dijkstra.java
-C:\Users\pablo\Desktop\repos\MEDlyon\Server\springboot\src\main\java\com\medlyon\backend\core\structure\Aline.java
 C:\Users\pablo\Desktop\repos\MEDlyon\Server\springboot\src\main\java\com\medlyon\backend\core\structure\Bus.java
 C:\Users\pablo\Desktop\repos\MEDlyon\Server\springboot\src\main\java\com\medlyon\backend\core\structure\BusStop.java
 C:\Users\pablo\Desktop\repos\MEDlyon\Server\springboot\src\main\java\com\medlyon\backend\core\structure\Coordinates.java
 C:\Users\pablo\Desktop\repos\MEDlyon\Server\springboot\src\main\java\com\medlyon\backend\core\structure\Distance.java
 C:\Users\pablo\Desktop\repos\MEDlyon\Server\springboot\src\main\java\com\medlyon\backend\core\structure\Graph.java
-C:\Users\pablo\Desktop\repos\MEDlyon\Server\springboot\src\main\java\com\medlyon\backend\core\structure\Metro.java
 C:\Users\pablo\Desktop\repos\MEDlyon\Server\springboot\src\main\java\com\medlyon\backend\core\structure\MetroStop.java
 C:\Users\pablo\Desktop\repos\MEDlyon\Server\springboot\src\main\java\com\medlyon\backend\core\structure\Node.java
-C:\Users\pablo\Desktop\repos\MEDlyon\Server\springboot\src\main\java\com\medlyon\backend\core\structure\Route.java
 C:\Users\pablo\Desktop\repos\MEDlyon\Server\springboot\src\main\java\com\medlyon\backend\core\structure\Transport.java
 C:\Users\pablo\Desktop\repos\MEDlyon\Server\springboot\src\main\java\com\medlyon\backend\core\utilities\Costs.java
 C:\Users\pablo\Desktop\repos\MEDlyon\Server\springboot\src\main\java\com\medlyon\backend\core\utilities\Tools.java
@@ -21,5 +18,4 @@ C:\Users\pablo\Desktop\repos\MEDlyon\Server\springboot\src\main\java\com\medlyon
 C:\Users\pablo\Desktop\repos\MEDlyon\Server\springboot\src\main\java\com\medlyon\backend\model\PointResponse.java
 C:\Users\pablo\Desktop\repos\MEDlyon\Server\springboot\src\main\java\com\medlyon\backend\model\RouteComparisonResponse.java
 C:\Users\pablo\Desktop\repos\MEDlyon\Server\springboot\src\main\java\com\medlyon\backend\model\StopSummary.java
-C:\Users\pablo\Desktop\repos\MEDlyon\Server\springboot\src\main\java\com\medlyon\backend\model\TransitNode.java
 C:\Users\pablo\Desktop\repos\MEDlyon\Server\springboot\src\main\java\com\medlyon\backend\service\TransitService.java

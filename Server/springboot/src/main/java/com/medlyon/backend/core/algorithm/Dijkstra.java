@@ -5,13 +5,15 @@ import com.medlyon.backend.core.structure.Node;
 import com.medlyon.backend.core.structure.Distance;
 import com.medlyon.backend.core.utilities.Costs;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Comparator;
+import java.util.Deque;
 import java.util.Optional;
 
 /**
@@ -37,16 +39,23 @@ public class Dijkstra {
         public Map<Node, Node> getPreviousMap() { return Collections.unmodifiableMap(previous); }
 
         public List<Node> reconstructPath(Node target) {
-            List<Node> path = new ArrayList<>();
+            if (target == null || !distances.containsKey(target) || Double.isInfinite(getDistance(target))) {
+                return List.of();
+            }
+
+            Deque<Node> path = new ArrayDeque<>();
             Node cur = target;
-            while (cur != null && previous.containsKey(cur)) {
-                path.addFirst(cur);
+            path.addFirst(cur);
+
+            while (previous.containsKey(cur)) {
                 cur = previous.get(cur);
-            }
-            if (cur != null && distances.containsKey(cur) && distances.get(cur) == 0.0) {
+                if (cur == null) {
+                    break;
+                }
                 path.addFirst(cur);
             }
-            return path;
+
+            return new ArrayList<>(path);
         }
     }
 

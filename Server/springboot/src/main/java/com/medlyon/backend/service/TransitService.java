@@ -1,10 +1,19 @@
 package com.medlyon.backend.service;
 
+import com.medlyon.backend.core.algorithm.AStar;
+import com.medlyon.backend.core.algorithm.CO2;
+import com.medlyon.backend.core.algorithm.Dijkstra;
+import com.medlyon.backend.core.structure.Bus;
+import com.medlyon.backend.core.structure.BusStop;
+import com.medlyon.backend.core.structure.Coordinates;
+import com.medlyon.backend.core.structure.Distance;
+import com.medlyon.backend.core.structure.Graph;
+import com.medlyon.backend.core.structure.Node;
+import com.medlyon.backend.core.utilities.Tools;
 import com.medlyon.backend.model.PathResponse;
 import com.medlyon.backend.model.PointResponse;
 import com.medlyon.backend.model.RouteComparisonResponse;
 import com.medlyon.backend.model.StopSummary;
-import com.medlyon.backend.model.TransitNode;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,20 +24,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Deque;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
-import java.util.PriorityQueue;
-import java.util.Set;
 
 @Service
 public class TransitService {
@@ -36,8 +39,12 @@ public class TransitService {
 	@Value("${medlyon.data-dir:}")
 	private String configuredDataDir;
 
-	private final Map<String, TransitNode> nodesById = new LinkedHashMap<>();
-	private final Map<String, List<TripStop>> tripStops = new HashMap<>();
+	private final Graph graph = new Graph();
+	private final Map<String, BusStop> stopsById = new LinkedHashMap<>();
+	private final Map<String, Bus> tripsById = new LinkedHashMap<>();
+	private final Map<String, String> tripToRoute = new HashMap<>();
+	private final Map<String, List<String>> stopToTrips = new HashMap<>();
+	private final Map<String, List<String>> stopToRoutes = new HashMap<>();
 
 	@PostConstruct
 	void init() throws IOException {
@@ -54,187 +61,107 @@ public class TransitService {
 		}
 
 		String needle = nodeName.trim().toLowerCase(Locale.ROOT);
-		Optional<TransitNode> exact = nodesById.values().stream()
-				.filter(node -> node.id().equalsIgnoreCase(needle) || node.name().equalsIgnoreCase(nodeName.trim()))
-				.findFirst();
-		if (exact.isPresent()) {
-			return exact.get().toResponse();
+		BusStop exact = stopsById.values().stream()
+				.filter(stop -> stop.getId().equalsIgnoreCase(nodeName.trim()) || stop.getName().equalsIgnoreCase(nodeName.trim()))
+				.findFirst()
+				.orElse(null);
+		if (exact != null) {
+			return toPointResponse(exact);
 		}
 
-		return nodesById.values().stream()
-				.filter(node -> node.name().toLowerCase(Locale.ROOT).contains(needle) || node.id().toLowerCase(Locale.ROOT).contains(needle))
-				.min(Comparator.comparing(node -> node.name().length()))
-				.map(TransitNode::toResponse)
+		BusStop partial = stopsById.values().stream()
+				.filter(stop -> stop.getName().toLowerCase(Locale.ROOT).contains(needle)
+						|| stop.getId().toLowerCase(Locale.ROOT).contains(needle))
+				.min(Comparator.comparingInt(stop -> stop.getName().length()))
 				.orElseThrow(() -> new IllegalArgumentException("Unknown node: " + nodeName));
+		return toPointResponse(partial);
 	}
 
 	public PointResponse findClosestNode(double lat, double lng) {
-		TransitNode closest = nodesById.values().stream()
-				.min(Comparator.comparingDouble(node -> haversineMeters(lat, lng, node.lat(), node.lng())))
-				.orElseThrow(() -> new IllegalStateException("No transit nodes loaded"));
-		return closest.toResponse();
+		return toPointResponse(nearestNode(lat, lng));
 	}
 
 	public List<StopSummary> listStops() {
-		return nodesById.values().stream()
-				.sorted(Comparator.comparing(TransitNode::name).thenComparing(TransitNode::id))
-				.map(TransitNode::toSummary)
+		return stopsById.values().stream()
+				.sorted(Comparator.comparing(BusStop::getName).thenComparing(BusStop::getId))
+				.map(stop -> new StopSummary(
+						stop.getId(),
+						stop.getCoordinates().latitude(),
+						stop.getCoordinates().longitude(),
+						stop.getName()
+				))
 				.toList();
 	}
 
 	public PathResponse computePath(double slat, double slng, double elat, double elng) {
-		TransitNode start = nearestNode(slat, slng);
-		TransitNode end = nearestNode(elat, elng);
-		return new PathResponse(computeShortestPath(start, end));
+		BusStop start = nearestNode(slat, slng);
+		BusStop end = nearestNode(elat, elng);
+		Dijkstra.ShortestPathsResult result = Dijkstra.computeShortestPaths(graph, start);
+		return new PathResponse(toPointResponses(result.reconstructPath(end)));
 	}
 
 	public RouteComparisonResponse compareAlgorithms(double slat, double slng, double elat, double elng) {
-		TransitNode start = nearestNode(slat, slng);
-		TransitNode end = nearestNode(elat, elng);
+		BusStop start = nearestNode(slat, slng);
+		BusStop end = nearestNode(elat, elng);
 
 		long dijkstraStart = System.nanoTime();
-		List<PointResponse> dijkstraPath = computeShortestPath(start, end);
+		List<Node> dijkstraNodes = Dijkstra.computeShortestPaths(graph, start).reconstructPath(end);
+		List<PointResponse> dijkstraPath = toPointResponses(dijkstraNodes);
 		long dijkstraTime = System.nanoTime() - dijkstraStart;
+		double dijkstraCo2 = CO2.computeRouteCO2(dijkstraNodes);
 
 		long aStarStart = System.nanoTime();
-		List<PointResponse> aStarPath = computeAStarPath(start, end);
+		List<Node> aStarNodes = AStar.computeShortestPath(graph, start, end).reconstructPath(end);
+		List<PointResponse> aStarPath = toPointResponses(aStarNodes);
 		long aStarTime = System.nanoTime() - aStarStart;
+		double aStarCo2 = CO2.computeRouteCO2(aStarNodes);
 
 		return new RouteComparisonResponse(
 				new PathResponse(dijkstraPath),
 				new PathResponse(aStarPath),
 				dijkstraTime,
-				aStarTime
+				aStarTime,
+				dijkstraCo2,
+				aStarCo2
 		);
 	}
 
-	private TransitNode nearestNode(double lat, double lng) {
-		return nodesById.values().stream()
-				.min(Comparator.comparingDouble(node -> haversineMeters(lat, lng, node.lat(), node.lng())))
+	private BusStop nearestNode(double lat, double lng) {
+		return stopsById.values().stream()
+				.min(Comparator.comparingDouble(stop -> Tools.haversineMeters(lat, lng, stop.getCoordinates().latitude(), stop.getCoordinates().longitude())))
 				.orElseThrow(() -> new IllegalStateException("No transit nodes loaded"));
 	}
 
-	private List<PointResponse> computeShortestPath(TransitNode start, TransitNode end) {
-		if (start.id().equals(end.id())) {
-			return List.of(start.toResponse());
+	private List<PointResponse> toPointResponses(List<Node> nodes) {
+		if (nodes == null || nodes.isEmpty()) {
+			return List.of();
 		}
-
-		Map<String, Double> distance = new HashMap<>();
-		Map<String, String> previous = new HashMap<>();
-		Set<String> visited = new HashSet<>();
-		for (String id : nodesById.keySet()) {
-			distance.put(id, Double.POSITIVE_INFINITY);
+		List<PointResponse> responses = new ArrayList<>(nodes.size());
+		for (Node node : nodes) {
+			responses.add(toPointResponse(node));
 		}
-		distance.put(start.id(), 0.0);
-
-		while (true) {
-			String currentId = null;
-			double bestDistance = Double.POSITIVE_INFINITY;
-			for (Map.Entry<String, Double> entry : distance.entrySet()) {
-				if (!visited.contains(entry.getKey()) && entry.getValue() < bestDistance) {
-					bestDistance = entry.getValue();
-					currentId = entry.getKey();
-				}
-			}
-
-			if (currentId == null || Double.isInfinite(bestDistance)) {
-				break;
-			}
-			if (currentId.equals(end.id())) {
-				break;
-			}
-
-			visited.add(currentId);
-			TransitNode current = nodesById.get(currentId);
-			for (Map.Entry<String, Double> link : current.links().entrySet()) {
-				double candidate = bestDistance + link.getValue();
-				if (candidate < distance.getOrDefault(link.getKey(), Double.POSITIVE_INFINITY)) {
-					distance.put(link.getKey(), candidate);
-					previous.put(link.getKey(), currentId);
-				}
-			}
-		}
-
-		return reconstructPath(start, end, previous);
+		return responses;
 	}
 
-	private List<PointResponse> computeAStarPath(TransitNode start, TransitNode end) {
-		if (start.id().equals(end.id())) {
-			return List.of(start.toResponse());
+	private PointResponse toPointResponse(Node node) {
+		List<String> additionalInformation = new ArrayList<>();
+		additionalInformation.add("stop_id=" + node.getId());
+
+		long tripCount = stopToTrips.getOrDefault(node.getId(), List.of()).stream().distinct().count();
+		long routeCount = stopToRoutes.getOrDefault(node.getId(), List.of()).stream().distinct().count();
+		if (tripCount > 0) {
+			additionalInformation.add("trip_count=" + tripCount);
+		}
+		if (routeCount > 0) {
+			additionalInformation.add("route_count=" + routeCount);
 		}
 
-		Map<String, Double> gScore = new HashMap<>();
-		Map<String, Double> fScore = new HashMap<>();
-		Map<String, String> previous = new HashMap<>();
-		Set<String> closed = new HashSet<>();
-
-		for (String id : nodesById.keySet()) {
-			gScore.put(id, Double.POSITIVE_INFINITY);
-			fScore.put(id, Double.POSITIVE_INFINITY);
-		}
-		gScore.put(start.id(), 0.0);
-		fScore.put(start.id(), haversineMeters(start.lat(), start.lng(), end.lat(), end.lng()));
-
-		PriorityQueue<String> open = new PriorityQueue<>(Comparator.comparingDouble(fScore::get));
-		open.add(start.id());
-
-		while (!open.isEmpty()) {
-			String currentId = open.poll();
-			if (closed.contains(currentId)) {
-				continue;
-			}
-			if (currentId.equals(end.id())) {
-				break;
-			}
-			closed.add(currentId);
-
-			TransitNode current = nodesById.get(currentId);
-			if (current == null) {
-				continue;
-			}
-
-			for (Map.Entry<String, Double> link : current.links().entrySet()) {
-				String neighborId = link.getKey();
-				TransitNode neighbor = nodesById.get(neighborId);
-				if (neighbor == null || closed.contains(neighborId)) {
-					continue;
-				}
-
-				double tentativeG = gScore.getOrDefault(currentId, Double.POSITIVE_INFINITY) + link.getValue();
-				if (tentativeG < gScore.getOrDefault(neighborId, Double.POSITIVE_INFINITY)) {
-					previous.put(neighborId, currentId);
-					gScore.put(neighborId, tentativeG);
-					double estimated = tentativeG + haversineMeters(neighbor.lat(), neighbor.lng(), end.lat(), end.lng());
-					fScore.put(neighborId, estimated);
-					open.remove(neighborId);
-					open.add(neighborId);
-				}
-			}
-		}
-
-		return reconstructPath(start, end, previous);
-	}
-
-	private List<PointResponse> reconstructPath(TransitNode start, TransitNode end, Map<String, String> previous) {
-		Deque<PointResponse> result = new ArrayDeque<>();
-		String cursor = end.id();
-		if (!previous.containsKey(cursor) && !cursor.equals(start.id())) {
-			return List.of(start.toResponse(), end.toResponse());
-		}
-
-		result.addFirst(end.toResponse());
-		while (previous.containsKey(cursor)) {
-			cursor = previous.get(cursor);
-			TransitNode node = nodesById.get(cursor);
-			if (node == null) {
-				break;
-			}
-			result.addFirst(node.toResponse());
-		}
-		if (!result.isEmpty() && !result.peekFirst().name().equals(start.name())) {
-			result.addFirst(start.toResponse());
-		}
-		return new ArrayList<>(result);
+		return new PointResponse(
+				node.getCoordinates().latitude(),
+				node.getCoordinates().longitude(),
+				node.getName(),
+				additionalInformation
+		);
 	}
 
 	private void loadStops(Path stopsPath) throws IOException {
@@ -256,7 +183,9 @@ public class TransitService {
 				try {
 					double lat = Double.parseDouble(latValue);
 					double lng = Double.parseDouble(lngValue);
-					nodesById.put(id, new TransitNode(id, name.isBlank() ? id : name, lat, lng));
+					BusStop stop = new BusStop(id, name.isBlank() ? id : name, new Coordinates(lat, lng));
+					stopsById.put(id, stop);
+					graph.addNode(stop);
 				} catch (NumberFormatException ignored) {
 				}
 			}
@@ -273,9 +202,12 @@ public class TransitService {
 				}
 				List<String> cells = splitCsv(line);
 				String tripId = columns.value(cells, "trip_id");
-				if (!tripId.isBlank()) {
-					tripStops.putIfAbsent(tripId, new ArrayList<>());
+				String routeId = columns.value(cells, "route_id");
+				if (tripId.isBlank()) {
+					continue;
 				}
+				tripToRoute.put(tripId, routeId);
+				tripsById.putIfAbsent(tripId, new Bus(tripId));
 			}
 		}
 	}
@@ -292,12 +224,24 @@ public class TransitService {
 				String tripId = columns.value(cells, "trip_id");
 				String stopId = columns.value(cells, "stop_id");
 				String sequenceValue = columns.value(cells, "stop_sequence");
-				if (tripId.isBlank() || stopId.isBlank() || sequenceValue.isBlank() || !nodesById.containsKey(stopId)) {
+				if (tripId.isBlank() || stopId.isBlank() || sequenceValue.isBlank()) {
 					continue;
 				}
+
+				BusStop stop = stopsById.get(stopId);
+				if (stop == null) {
+					continue;
+				}
+
 				try {
 					int sequence = Integer.parseInt(sequenceValue);
-					tripStops.computeIfAbsent(tripId, ignored -> new ArrayList<>()).add(new TripStop(stopId, sequence));
+					Bus bus = tripsById.computeIfAbsent(tripId, id -> new Bus(id));
+					bus.addStop(stop, sequence);
+					stopToTrips.computeIfAbsent(stopId, ignored -> new ArrayList<>()).add(tripId);
+					String routeId = tripToRoute.get(tripId);
+					if (routeId != null && !routeId.isBlank()) {
+						stopToRoutes.computeIfAbsent(stopId, ignored -> new ArrayList<>()).add(routeId);
+					}
 				} catch (NumberFormatException ignored) {
 				}
 			}
@@ -305,20 +249,19 @@ public class TransitService {
 	}
 
 	private void linkTrips() {
-		for (List<TripStop> stops : tripStops.values()) {
-			List<TripStop> ordered = stops.stream()
-					.filter(stop -> !stop.stopId().isBlank())
-					.sorted(Comparator.comparingInt(TripStop::sequence))
-					.toList();
+		for (Bus bus : tripsById.values()) {
+			List<Node> ordered = bus.getStopsOrdered();
 			for (int i = 0; i + 1 < ordered.size(); i++) {
-				TransitNode a = nodesById.get(ordered.get(i).stopId());
-				TransitNode b = nodesById.get(ordered.get(i + 1).stopId());
-				if (a == null || b == null) {
-					continue;
-				}
-				double distance = haversineMeters(a.lat(), a.lng(), b.lat(), b.lng());
-				a.linkTo(b.id(), distance);
-				b.linkTo(a.id(), distance);
+				Node a = ordered.get(i);
+				Node b = ordered.get(i + 1);
+				double distance = Tools.haversineMeters(
+						a.getCoordinates().latitude(),
+						a.getCoordinates().longitude(),
+						b.getCoordinates().latitude(),
+						b.getCoordinates().longitude()
+				);
+				a.addLink(b, new Distance(distance));
+				b.addLink(a, new Distance(distance));
 			}
 		}
 	}
@@ -340,17 +283,6 @@ public class TransitService {
 				.orElseThrow(() -> new IllegalStateException("Unable to find raw_datasets/bus/lyon_tcl"));
 	}
 
-	private static double haversineMeters(double lat1, double lon1, double lat2, double lon2) {
-		final double earthRadius = 6_371_000.0;
-		double dLat = Math.toRadians(lat2 - lat1);
-		double dLon = Math.toRadians(lon2 - lon1);
-		double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
-				+ Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
-				* Math.sin(dLon / 2) * Math.sin(dLon / 2);
-		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-		return earthRadius * c;
-	}
-
 	private static List<String> splitCsv(String line) {
 		List<String> values = new ArrayList<>();
 		StringBuilder current = new StringBuilder();
@@ -370,9 +302,6 @@ public class TransitService {
 		}
 		values.add(current.toString().trim());
 		return values;
-	}
-
-	private record TripStop(String stopId, int sequence) {
 	}
 
 	private static final class CsvColumns {

@@ -1,10 +1,10 @@
-package Core;
+package com.medlyon.backend.core.algorithm;
 
-import structure.BusStop;
-import structure.Distance;
-import structure.MetroStop;
-import structure.Node;
-import utilities.Costs;
+import com.medlyon.backend.core.structure.BusStop;
+import com.medlyon.backend.core.structure.Distance;
+import com.medlyon.backend.core.structure.MetroStop;
+import com.medlyon.backend.core.structure.Node;
+import com.medlyon.backend.core.utilities.Costs;
 
 import java.util.List;
 import java.util.Map;

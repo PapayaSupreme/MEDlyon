@@ -47,35 +47,10 @@ public abstract class Transport {
         stops.add(node);
     }
 
-    public boolean removeStop(Node node) {
-        sequenceMap.remove(node);
-        return stops.remove(node);
-    }
-
-    // returns the next stop after `current` according to sequence numbers
-    public Node nextStop(Node current) {
-        Integer curSeq = sequenceMap.get(current);
-        if (curSeq == null) return null;
-        Node best = null;
-        int bestSeq = Integer.MAX_VALUE;
-        for (Map.Entry<Node, Integer> e : sequenceMap.entrySet()) {
-            int s = e.getValue();
-            if (s > curSeq && s < bestSeq) {
-                bestSeq = s;
-                best = e.getKey();
-            }
-        }
-        return best;
-    }
-
     // returns the stops in order as a list
     public List<Node> getStopsOrdered() {
         List<Node> list = new ArrayList<>(stops);
         list.sort(seqComparator);
         return list;
     }
-
-    public boolean contains(Node node) { return sequenceMap.containsKey(node); }
-
-    public abstract String getTransportType();
 }

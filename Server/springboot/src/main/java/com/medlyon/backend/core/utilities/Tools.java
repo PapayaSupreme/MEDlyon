@@ -1,4 +1,4 @@
-package utilities;
+package com.medlyon.backend.core.utilities;
 
 public class Tools {
     // Haversine formula -> distance in meters between two lat/lon points
