@@ -12,7 +12,7 @@ const Nodes=[], Paths=[{Path:[],Nodes:[]}]
 
 async function ComputeFullPath(setfailure) {
     if (Nodes.length<2){
-        setfailure("You need at least 2 Nodes, one start and one ending node.")
+        setfailure("il faut 2 arrêts, un de départ et un d'arrivé")
         return;
     }
     let pathId=Paths.length

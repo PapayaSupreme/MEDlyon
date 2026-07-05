@@ -35,7 +35,6 @@ function App() {
       if (mounted) {
         setStops([])
         setLoadingStops(false)
-        setStatus('Unable to load the stop list from Spring Boot.')
         setStatus('Impossible de charger les arrêts depuis le Spring Boot.')
       }
     })
