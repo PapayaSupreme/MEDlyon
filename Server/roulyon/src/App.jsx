@@ -26,7 +26,7 @@ function App() {
       setStops(data)
       setLoadingStops(false)
       if (!data.length) {
-        setStatus('No stops were loaded from the backend.')
+        setStatus('Auncun arrêt chargé depuis le Backend.')
       }
     }
 
@@ -106,8 +106,8 @@ function App() {
       <aside className="sidebar">
         <div className="panel">
           <div className="panel-header">
-            <h1>MEDLyon</h1>
-            <p>Pick a departure stop, pick an arrival stop, then compute the route.</p>
+            <h1>Roulyon</h1>
+            <p>Choissisez un point de départ, un point d'arrivée, puis calculez le itinéraire.</p>
           </div>
 
           <div className="toggle-row" role="tablist" aria-label="Selection target">
@@ -116,40 +116,40 @@ function App() {
               className={selectionTarget === 'departure' ? 'toggle active' : 'toggle'}
               onClick={() => setSelectionTarget('departure')}
             >
-              Departure
+              Départ
             </button>
             <button
               type="button"
               className={selectionTarget === 'arrival' ? 'toggle active' : 'toggle'}
               onClick={() => setSelectionTarget('arrival')}
             >
-              Arrival
+              Arrivé
             </button>
           </div>
 
           <label className="search-field">
-            <span>Search stop</span>
+            <span>Rechercher un arrêt</span>
             <input
               type="search"
               value={query}
-              placeholder="Type a stop name or id"
+              placeholder="Tape un nom ou un ID d'arrêt"
               onChange={e => setQuery(e.target.value)}
             />
           </label>
 
           <div className="selection-summary">
             <div>
-              <span>Departure</span>
-              <strong>{departure ? departure.name : 'None selected'}</strong>
+              <span>Départ</span>
+              <strong>{departure ? departure.name : 'Aucun sélectionné'}</strong>
             </div>
             <div>
-              <span>Arrival</span>
-              <strong>{arrival ? arrival.name : 'None selected'}</strong>
+              <span>Arrivé</span>
+              <strong>{arrival ? arrival.name : 'Aucun sélectionné'}</strong>
             </div>
           </div>
 
           <button type="button" className="compute-button" onClick={handleCompute} disabled={computing || loadingStops}>
-            {computing ? 'Computing...' : 'Compute itinerary'}
+            {computing ? 'Computing...' : 'Calculer l’itinéraire'}
           </button>
 
           <p className="status-line">{status}</p>
@@ -157,8 +157,8 @@ function App() {
 
         <div className="panel results-panel">
           <div className="results-header">
-            <h2>Stops</h2>
-            <span>{loadingStops ? 'Loading...' : `${filteredStops.length} shown`}</span>
+            <h2>Arrêts</h2>
+            <span>{loadingStops ? 'Loading...' : `${filteredStops.length} résultats`}</span>
           </div>
 
           <div className="stop-list">
@@ -178,8 +178,8 @@ function App() {
 
         <div className="panel">
           <div className="results-header">
-            <h2>Itinerary</h2>
-            <span>{itinerary.length ? `${itinerary.length} stops` : 'None'}</span>
+            <h2>Itinéraire</h2>
+            <span>{itinerary.length ? `${itinerary.length} stops` : 'aucun'}</span>
           </div>
 
           <ol className="itinerary-list">
@@ -194,8 +194,8 @@ function App() {
 
         <div className="panel">
           <div className="results-header">
-            <h2>Compute time</h2>
-            <span>Backend timing</span>
+            <h2>Temps de calcul</h2>
+            <span>temps de Backend</span>
           </div>
 
           <div className="timing-grid">
@@ -208,7 +208,7 @@ function App() {
               <strong>{timings.aStar ? formatMs(timings.aStar) : '---'}</strong>
             </div>
             <div>
-              <span>Stops</span>
+              <span>Arrêts</span>
               <strong>{aStarItinerary.length || itinerary.length || 0}</strong>
             </div>
           </div>
