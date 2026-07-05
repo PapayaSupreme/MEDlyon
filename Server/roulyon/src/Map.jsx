@@ -29,7 +29,7 @@ function TransitMap({ stops, departure, arrival, path, onSelectStop, onSelectDep
           </LayersControl.Overlay>
           <LayersControl.Overlay checked name="Itinerary">
             {path.length > 1 ? (
-              <Polyline pathOptions={{ color: '#b42318', weight: 4 }} positions={path} />
+              <Polyline pathOptions={{color: '#C8102E',weight: 6,opacity: 0.9}}/>
             ) : null}
           </LayersControl.Overlay>
         </LayersControl>
@@ -43,7 +43,7 @@ function LayerGroupStops({ stops, departure, arrival, onSelectStop, onSelectDepa
   return stops.map(stop => {
     const isDeparture = departure?.id === stop.id
     const isArrival = arrival?.id === stop.id
-    const color = isDeparture ? '#2563eb' : isArrival ? '#16a34a' : '#334155'
+    const color = isDeparture ? "#0055A4" : isArrival ? "#C8102E" : "#666666";
     const radius = isDeparture || isArrival ? 8 : 4
 
     return (
