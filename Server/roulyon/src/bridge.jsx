@@ -65,6 +65,8 @@ async function comparePathAlgorithms(sNode, eNode) {
             aStar: [],
             dijkstraTimeNanos: 0,
             aStarTimeNanos: 0,
+            dijkstraCo2Grams: 0,
+            aStarCo2Grams: 0,
         }
     }
 
@@ -81,6 +83,8 @@ async function comparePathAlgorithms(sNode, eNode) {
         aStar: mapPath(data.aStar),
         dijkstraTimeNanos: data.dijkstraTimeNanos ?? 0,
         aStarTimeNanos: data.aStarTimeNanos ?? 0,
+        dijkstraCo2Grams: data.dijkstraCo2Grams ?? 0,
+        aStarCo2Grams: data.aStarCo2Grams ?? 0,
     }
 }
 

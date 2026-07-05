@@ -9,7 +9,4 @@ public record PointResponse(
 		@JsonProperty("name") String name,
 		@JsonProperty("Additional_Information") List<String> additionalInformation
 ) {
-	public static PointResponse of(double lat, double lng, String name) {
-		return new PointResponse(lat, lng, name, List.of());
-	}
 }
