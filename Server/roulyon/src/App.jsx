@@ -36,6 +36,7 @@ function App() {
         setStops([])
         setLoadingStops(false)
         setStatus('Unable to load the stop list from Spring Boot.')
+        setStatus('Impossible de charger les arrêts depuis le Spring Boot.')
       }
     })
 
@@ -200,12 +201,8 @@ function App() {
 
         <div className="panel">
           <div className="results-header">
-            <h2>Temps de calcul</h2>
-            <span>temps de Backend</span>
-=======
-            <h2>Metrics</h2>
-            <span>Backend timing and CO2</span>
->>>>>>> 1dc9e6838a77e2acdf7369444404899795b59dee
+            <h2>Statistiques</h2>
+            <span>temps de Backend et CO2</span>
           </div>
 
           <div className="timing-grid">
