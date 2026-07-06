@@ -1,11 +1,11 @@
-Requirements: Java SDK 21+
+Requirements: Java SDK 26+
 
-Entry point : [./src/App.java](/src/App.java)
+Entry point: [./src/App.java](/src/App.java)
 
 # Running the Application:
 
 You can download the jar CLI application built through the github releases.
-To use it use the command :
+To use it, use the command :
 ```bash
 java -jar CLIApp.jar argument_1 argument_2 argument_3 argument_4 ...
 ```
@@ -18,7 +18,7 @@ java -jar CLIApp.jar argument_1 argument_2 argument_3 argument_4 ...
 
 # Open Source Data:
 
-##### Disclaimer : You can find the different licenses for the content inside the folder in which they should be downloaded.
+##### Disclaimer: You can find the different licenses for the content inside the folder in which they should be downloaded.
 (`raw_datasets/(bus|metro|co2)`)
 
 https://transport.data.gouv.fr/
@@ -29,7 +29,7 @@ We Use the following data sets:
 - [Metro Station to Roads (modified) (`metro`)](https://data.grandlyon.com/portail/fr/jeux-de-donnees/lignes-bus-reseau-transports-commun-lyonnais-v2/info)
 ------------
 
-# How it works : architecture
+# How it works: architecture
 
 - `/structure/`:
   - `Node` is an abstract stop, `BusStop` & `MetroStop` are its instanciations
@@ -50,7 +50,7 @@ We Use the following data sets:
 
 - `/Autre/` : 
   - `AppAlt` : A previous entrypoint for testing the metro part of the application. It is now deprecated.
-  - `horairetocsv` : Is a python script that was used to modify the metro's `horaire` dataset.
+  - `horairetocsv` : Is a Python script that was used to modify the metro's `horaire` dataset.
 
 `App` : Entrypoint
 
