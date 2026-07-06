@@ -1,24 +1,29 @@
-Requirements: Java SDK 21+
+# Requirements: 
+- Java SDK 26.0.1+
+- Node.JS 16.13.1+
+- Maven 3.8.4+
+- Spring Boot 2.7.1+
+- React 18.2.0+
 
-Entry point : [./src/App.java](/src/App.java)
+Entry point: [./src/App.java](/src/App.java)
 
 # Running the Application:
 
-You can download the jar CLI application built through the github releases.
-To use it use the command :
+You can download the jar CLI application built through the GitHub releases.
+To use it, use the command :
 ```bash
 java -jar CLIApp.jar argument_1 argument_2 argument_3 argument_4 ...
 ```
 
-- `Argument_1` : The path to the bus files (named : Stop_times.txt, stops.txt, trips.txt) 
+- `Argument_1` : The path to the bus files (named: Stop_times.txt, stops.txt, trips.txt) 
 - `Argument_2` : The path to the metro files (named: horaires_tcl.csv, stations-metro-reseau-transports-commun-lyonnais.csv)
-- `Argument_3` : The ID of the stop from which dijkstra should start it's search
+- `Argument_3` : The ID of the stop from which dijkstra should start its search
 - `Argument_4` : The ID of the stop where the dijkstra algorithm should search a path to.
-- if `Argument 3 and 4` are not specified, There exists another 3rd possible argument : "-noCLI", to directly exit upon finishing the tests.
+- if `Argument 3 and 4` are not specified, There exists another third possible argument: "-noCLI", to directly exit upon finishing the tests.
 
 # Open Source Data:
 
-##### Disclaimer : You can find the different licenses for the content inside the folder in which they should be downloaded.
+##### Disclaimer: You can find the different licenses for the content inside the folder in which they should be downloaded.
 (`raw_datasets/(bus|metro|co2)`)
 
 https://transport.data.gouv.fr/
@@ -29,7 +34,7 @@ We Use the following data sets:
 - [Metro Station to Roads (modified) (`metro`)](https://data.grandlyon.com/portail/fr/jeux-de-donnees/lignes-bus-reseau-transports-commun-lyonnais-v2/info)
 ------------
 
-# How it works : architecture
+# How it works: architecture
 
 - `/structure/`:
   - `Node` is an abstract stop, `BusStop` & `MetroStop` are its instanciations
@@ -50,7 +55,7 @@ We Use the following data sets:
 
 - `/Autre/` : 
   - `AppAlt` : A previous entrypoint for testing the metro part of the application. It is now deprecated.
-  - `horairetocsv` : Is a python script that was used to modify the metro's `horaire` dataset.
+  - `horairetocsv` : Is a Python script that was used to modify the metro's `horaire` dataset.
 
 `App` : Entrypoint
 
