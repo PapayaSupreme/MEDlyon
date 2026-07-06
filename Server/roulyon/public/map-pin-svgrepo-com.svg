@@ -1,0 +1,58 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="silver" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F5F5F5"></stop>
+      <stop offset="50%" stop-color="#C8C8C8"></stop>
+      <stop offset="100%" stop-color="#8F8F8F"></stop>
+    </linearGradient>
+
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="5" stdDeviation="6" flood-opacity="0.25"></feDropShadow>
+    </filter>
+  </defs>
+
+  <!-- Fond -->
+  <rect x="26" y="26" width="460" height="460" rx="90" fill="url(#silver)" filter="url(#shadow)"></rect>
+
+  <!-- Cercle central -->
+  <circle cx="256" cy="256" r="145" fill="white" opacity="0.95"></circle>
+
+  <!-- Route -->
+  <path d="M130 360
+           C180 330 220 290 255 250
+           C290 210 335 175 385 150" fill="none" stroke="#D6001C" stroke-width="18" stroke-linecap="round"></path>
+
+  <!-- Point départ -->
+  <circle cx="130" cy="360" r="18" fill="#D6001C"></circle>
+
+  <!-- Point intermédiaire -->
+  <circle cx="255" cy="250" r="14" fill="#D6001C"></circle>
+
+  <!-- Destination -->
+  <g transform="translate(385,150)">
+      <path d="M0-35
+               C20-35 35-20 35 0
+               C35 30 0 60 0 60
+               C0 60 -35 30 -35 0
+               C-35-20 -20-35 0-35Z" fill="#D6001C"></path>
+      <circle cx="0" cy="0" r="12" fill="white"></circle>
+  </g>
+
+  <!-- Tram -->
+  <g transform="translate(105,125)">
+      <rect x="0" y="0" width="80" height="105" rx="18" fill="url(#silver)" stroke="#666" stroke-width="3"></rect>
+      <rect x="15" y="18" width="50" height="35" fill="white"></rect>
+      <circle cx="22" cy="83" r="5" fill="#D6001C"></circle>
+      <circle cx="58" cy="83" r="5" fill="#D6001C"></circle>
+      <line x1="15" y1="-15" x2="65" y2="-15" stroke="#666" stroke-width="4"></line>
+      <line x1="40" y1="-15" x2="40" y2="0" stroke="#666" stroke-width="4"></line>
+  </g>
+
+  <!-- Bus -->
+  <g transform="translate(325,285)">
+      <rect x="0" y="0" width="82" height="102" rx="18" fill="url(#silver)" stroke="#666" stroke-width="3"></rect>
+      <rect x="15" y="18" width="52" height="35" fill="white"></rect>
+      <circle cx="22" cy="82" r="5" fill="#D6001C"></circle>
+      <circle cx="60" cy="82" r="5" fill="#D6001C"></circle>
+  </g>
+</svg>

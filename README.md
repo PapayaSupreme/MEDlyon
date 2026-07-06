@@ -4,6 +4,7 @@
 - Maven 3.8.4+
 - Spring Boot 2.7.1+
 - React 18.2.0+
+Requirements: Java SDK 26+
 
 Entry point: [./src/App.java](/src/App.java)
 
