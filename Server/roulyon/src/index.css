@@ -8,9 +8,9 @@
   --panel: #ffffff;
   --panel-strong: #eef2f7;
   --border: #d7dde5;
-  --accent: #2563eb;
-  --accent-bg: rgba(37, 99, 235, 0.1);
-  --accent-border: rgba(37, 99, 235, 0.35);
+  --accent: #dc2626;
+  --accent-bg: rgba(220, 38, 38, 0.1);
+  --accent-border: rgba(220, 38, 38, 0.35);
   color: var(--text);
   background: var(--bg);
   font-synthesis: none;
