@@ -13,7 +13,7 @@ function EntryInterface() {
 
   function removeinput(){
     if (inputcount>2){
-        if (inputcount == Nodes.length) {
+        if (inputcount === Nodes.length) {
             if (!confirm("You will be removing the last Node that you created, are you sure?")) return;
             Nodes.pop()
         }
@@ -26,7 +26,7 @@ function EntryInterface() {
         <Inputs count={inputcount} setCount={setCount}></Inputs>
         <button className='addInput' onClick={e => {e.preventDefault();addinput()}}>+</button>
         <button className='removeInput' onClick={e => {e.preventDefault();removeinput()}}>-</button>
-        {/**You can always add more input but you can only remove one if there is no Node. */}
+        {/**You can always add more input, but you can only remove one if there is no Node. */}
     </>
   )
 }

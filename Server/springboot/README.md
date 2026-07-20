@@ -10,7 +10,7 @@ Minimal backend for the React bridge in `Server/roulyon/src/bridge.jsx`.
 
 ## Data source
 
-By default the service reads `raw_datasets/bus/lyon_tcl` from the repo root.
+By default, the service reads `raw_datasets/bus/lyon_tcl` from the repo root.
 
 Override it with:
 
